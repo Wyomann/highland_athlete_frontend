@@ -1,6 +1,6 @@
 import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import authenticationReducer, { registerUser, loginUser } from "../slices/authenticationSlice";
+import authenticationReducer, { registerUser, loginUser, logoutUser } from "../slices/authenticationSlice";
 
 // Create the listener middleware
 const listenerMiddleware = createListenerMiddleware();
@@ -8,7 +8,7 @@ const listenerMiddleware = createListenerMiddleware();
 // Listen for registration success
 listenerMiddleware.startListening({
   actionCreator: registerUser.fulfilled,
-  effect: (action) => {
+  effect: () => {
     toast.success("Registration successful! Welcome!");
   },
 });
@@ -25,7 +25,7 @@ listenerMiddleware.startListening({
 // Listen for login success
 listenerMiddleware.startListening({
   actionCreator: loginUser.fulfilled,
-  effect: (action) => {
+  effect: () => {
     toast.success("Login successful! Welcome back!");
   },
 });
@@ -36,6 +36,24 @@ listenerMiddleware.startListening({
   effect: (action) => {
     const errorMessage = action.payload as string || "Login failed. Please check your credentials.";
     toast.error(errorMessage);
+  },
+});
+
+// Listen for logout success
+listenerMiddleware.startListening({
+  actionCreator: logoutUser.fulfilled,
+  effect: () => {
+    toast.success("You have been logged out successfully.");
+  },
+});
+
+// Listen for logout errors
+listenerMiddleware.startListening({
+  actionCreator: logoutUser.rejected,
+  effect: (action) => {
+    // Even if logout API fails, user is still logged out locally
+    const errorMessage = action.payload as string || "Logout completed (session may still be active on server).";
+    toast.warning(errorMessage);
   },
 });
 

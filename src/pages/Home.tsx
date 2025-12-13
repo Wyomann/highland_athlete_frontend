@@ -1,18 +1,8 @@
 import { useState } from "react";
-import { Box, Container, CssBaseline, ThemeProvider, Typography, createTheme, Grid, Button } from "@mui/material";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { Box, Container, Typography, Grid, Button } from "@mui/material";
 import Testimonials from "../components/Testimonials";
 import UserRegistration from "../components/authentication/UserRegistration";
 import UserLogin from "../components/authentication/UserLogin";
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#1976d2",
-    },
-  },
-});
 
 const communityStats = [
   { value: "5.8M", label: "Weekly downloads on npm" },
@@ -26,10 +16,7 @@ function Home() {
   const [loginOpen, setLoginOpen] = useState(false);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Header />
-
+    <>
       {/* Hero Section */}
       <Container sx={{ mt: { xs: 6, md: 12 }, mb: 8, textAlign: "center", width: "100%" }}>
         <Typography
@@ -55,21 +42,11 @@ function Home() {
         <Typography component="h2" variant="h4" align="center" color="text.primary" gutterBottom sx={{ fontWeight: 700 }}>
           Join the community
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 8 }}>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => setRegistrationOpen(true)}
-            sx={{ px: 4, py: 1.5 }}
-          >
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 8 }}>
+          <Button variant="contained" size="large" onClick={() => setRegistrationOpen(true)} sx={{ px: 4, py: 1.5 }}>
             Register
           </Button>
-          <Button
-            variant="outlined"
-            size="large"
-            onClick={() => setLoginOpen(true)}
-            sx={{ px: 4, py: 1.5 }}
-          >
+          <Button variant="outlined" size="large" onClick={() => setLoginOpen(true)} sx={{ px: 4, py: 1.5 }}>
             Login
           </Button>
         </Box>
@@ -91,11 +68,9 @@ function Home() {
 
       <Testimonials />
 
-      <Footer />
-
       <UserRegistration open={registrationOpen} onClose={() => setRegistrationOpen(false)} />
       <UserLogin open={loginOpen} onClose={() => setLoginOpen(false)} />
-    </ThemeProvider>
+    </>
   );
 }
 
