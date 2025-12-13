@@ -17,7 +17,7 @@ const testimonials = [
 
 function Testimonials() {
   return (
-    <Box sx={{ bgcolor: "background.default", py: 12, width: "100%" }}>
+    <Box sx={{ bgcolor: "background.default", paddingBottom: 6, width: "100%" }}>
       <Container sx={{ width: "100%" }}>
         <Grid container spacing={4}>
           {testimonials.map((testimonial, index) => (

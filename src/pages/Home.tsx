@@ -3,6 +3,7 @@ import { Box, Container, Typography, Grid, Button } from "@mui/material";
 import Testimonials from "../components/Testimonials";
 import UserRegistration from "../components/authentication/UserRegistration";
 import UserLogin from "../components/authentication/UserLogin";
+import haBackground from "../assets/images/ha_background.png";
 
 const communityStats = [
   { value: "5.8M", label: "Weekly downloads on npm" },
@@ -18,28 +19,76 @@ function Home() {
   return (
     <>
       {/* Hero Section */}
-      <Container sx={{ mt: { xs: 6, md: 12 }, mb: 8, textAlign: "center", width: "100%" }}>
-        <Typography
-          component="h1"
-          variant="h2"
-          align="center"
-          color="text.primary"
-          gutterBottom
-          sx={{ fontWeight: 700, fontSize: { xs: "2.5rem", md: "3.75rem" } }}
-        >
-          Move faster
-          <br />
-          with intuitive React UI tools
-        </Typography>
-        <Typography variant="h5" align="center" color="text.secondary" paragraph sx={{ mt: 3, mb: 4 }}>
-          MUI offers a comprehensive suite of free UI tools to help you ship new features faster. Start with Material UI, our fully-loaded component library, or
-          bring your own design system to our production-ready components.
-        </Typography>
+      <Container
+        maxWidth={false}
+        sx={{
+          margin: 0,
+          borderRadius: 0,
+          maxWidth: "100% !important",
+          mb: 8,
+          textAlign: "center",
+          width: "100%",
+          backgroundImage: `url(${haBackground})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          position: "relative",
+          py: { xs: 8, md: 12 },
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
+            zIndex: 0,
+          },
+          "& > *": {
+            position: "relative",
+            zIndex: 1,
+          },
+        }}
+      >
+        <Box sx={{ maxWidth: 1200, mx: "auto", px: 2 }}>
+          <Typography
+            component="h3"
+            variant="h3"
+            align="center"
+            color="text.primary"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: "white",
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+              fontSize: { xs: "1.75rem", md: "3rem" },
+            }}
+          >
+              Highland Athlete Profiles and Rankings
+          </Typography>
+          <Typography
+            variant="h5"
+            align="center"
+            color="text.secondary"
+            paragraph
+            sx={{
+              mt: 3,
+              mb: 4,
+              color: "rgba(255, 255, 255, 0.9)",
+              textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+              fontSize: { xs: "1rem", md: "1.5rem" },
+            }}
+          >
+            Track your perosnal records, compete in rankings, and connect with fellow athletes who share your passion for throwing cabers, 
+            hammers, stones, and weights for distance.
+          </Typography>
+        </Box>
       </Container>
 
       {/* Join the Community Section */}
-      <Container sx={{ py: 12, width: "100%" }}>
-        <Typography component="h2" variant="h4" align="center" color="text.primary" gutterBottom sx={{ fontWeight: 700 }}>
+      <Container sx={{ py: 2, width: "100%" }}>
+        <Typography component="h2" variant="h4" align="center" color="text.primary" gutterBottom sx={{ fontWeight: 700, fontSize: { xs: "1.75rem", md: "3rem" } }}>
           Join the community
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 8 }}>
@@ -50,20 +99,6 @@ function Home() {
             Login
           </Button>
         </Box>
-        <Grid container spacing={4}>
-          {communityStats.map((stat, index) => (
-            <Grid size={{ xs: 6, sm: 3 }} key={index}>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography variant="h3" component="div" color="primary.main" sx={{ fontWeight: 700 }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  {stat.label}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
       </Container>
 
       <Testimonials />
