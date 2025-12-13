@@ -137,3 +137,46 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Build outputs
+build/
+dist/
+
+# React build outputs
+*.map
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Testing
+.nyc_output/
+coverage/
+*.test.js.snap
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Storybook build outputs
+storybook-static/
