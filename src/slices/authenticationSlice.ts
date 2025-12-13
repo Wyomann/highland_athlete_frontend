@@ -133,6 +133,64 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+// Forgot password async thunk
+export const forgotPassword = createAsyncThunk(
+  'authentication/forgotPassword',
+  async (data: { email: string }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(responseData.message || 'Failed to send password reset email');
+      }
+
+      return responseData;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to send password reset email'
+      );
+    }
+  }
+);
+
+// Reset password async thunk
+export const resetPassword = createAsyncThunk(
+  'authentication/resetPassword',
+  async (data: { token: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(responseData.message || 'Failed to reset password');
+      }
+
+      return responseData;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to reset password'
+      );
+    }
+  }
+);
+
 export const authenticationSlice = createSlice({
   name: 'authentication',
   initialState,
@@ -209,6 +267,36 @@ export const authenticationSlice = createSlice({
         state.loading = false;
         // Even if logout API fails, clear user state
         state.user = null;
+        state.error = action.payload as string;
+      });
+
+    // Forgot password
+    builder
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Reset password
+    builder
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
       });
   },

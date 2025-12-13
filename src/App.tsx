@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
+import ResetPassword from './pages/ResetPassword'
 import './App.css'
 
 const theme = createTheme({
@@ -23,6 +24,7 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
         <Footer />
         <ToastContainer

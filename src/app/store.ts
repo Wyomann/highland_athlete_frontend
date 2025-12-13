@@ -1,6 +1,6 @@
 import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import authenticationReducer, { registerUser, loginUser, logoutUser } from "../slices/authenticationSlice";
+import authenticationReducer, { registerUser, loginUser, logoutUser, forgotPassword, resetPassword } from "../slices/authenticationSlice";
 
 // Create the listener middleware
 const listenerMiddleware = createListenerMiddleware();
@@ -54,6 +54,40 @@ listenerMiddleware.startListening({
     // Even if logout API fails, user is still logged out locally
     const errorMessage = action.payload as string || "Logout completed (session may still be active on server).";
     toast.warning(errorMessage);
+  },
+});
+
+// Listen for forgot password success
+listenerMiddleware.startListening({
+  actionCreator: forgotPassword.fulfilled,
+  effect: () => {
+    toast.success("Password reset email sent! Please check your inbox.");
+  },
+});
+
+// Listen for forgot password errors
+listenerMiddleware.startListening({
+  actionCreator: forgotPassword.rejected,
+  effect: (action) => {
+    const errorMessage = action.payload as string || "Failed to send password reset email. Please try again.";
+    toast.error(errorMessage);
+  },
+});
+
+// Listen for reset password success
+listenerMiddleware.startListening({
+  actionCreator: resetPassword.fulfilled,
+  effect: () => {
+    toast.success("Password reset successful! You can now log in with your new password.");
+  },
+});
+
+// Listen for reset password errors
+listenerMiddleware.startListening({
+  actionCreator: resetPassword.rejected,
+  effect: (action) => {
+    const errorMessage = action.payload as string || "Failed to reset password. Please try again.";
+    toast.error(errorMessage);
   },
 });
 

@@ -9,10 +9,12 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  Link,
 } from '@mui/material';
 import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-material';
 import { loginUser } from '../../slices/authenticationSlice';
 import type { AppDispatch, RootState } from '../../app/store';
+import ForgotPassword from './ForgotPassword';
 
 interface UserLoginProps {
   open: boolean;
@@ -34,6 +36,7 @@ function UserLogin({ open, onClose }: UserLoginProps) {
   }>({});
 
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -117,89 +120,109 @@ function UserLogin({ open, onClose }: UserLoginProps) {
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      aria-labelledby="login-modal-title"
-      aria-describedby="login-modal-description"
-    >
-      <Box sx={modalStyle}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography id="login-modal-title" variant="h5" component="h2">
-            Sign In
-          </Typography>
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{ color: 'text.secondary' }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={!!validationErrors.email}
-            helperText={validationErrors.email}
-            required
-            fullWidth
-            autoComplete="email"
-          />
-
-          <TextField
-            label="Password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            value={formData.password}
-            onChange={handleChange}
-            error={!!validationErrors.password}
-            helperText={validationErrors.password}
-            required
-            fullWidth
-            autoComplete="current-password"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <Button
-              type="button"
-              variant="outlined"
+    <>
+      <Modal
+        open={open}
+        onClose={onClose}
+        aria-labelledby="login-modal-title"
+        aria-describedby="login-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography id="login-modal-title" variant="h5" component="h2">
+              Sign In
+            </Typography>
+            <IconButton
+              aria-label="close"
               onClick={onClose}
-              fullWidth
-              disabled={loading}
+              sx={{ color: 'text.secondary' }}
             >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              error={!!validationErrors.email}
+              helperText={validationErrors.email}
+              required
               fullWidth
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : null}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
+              autoComplete="email"
+            />
+
+            <TextField
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleChange}
+              error={!!validationErrors.password}
+              helperText={validationErrors.password}
+              required
+              fullWidth
+              autoComplete="current-password"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+              <Link
+                component="button"
+                type="button"
+                variant="body2"
+                onClick={() => {
+                  setForgotPasswordOpen(true);
+                }}
+                sx={{ cursor: 'pointer' }}
+              >
+                Forgot Password?
+              </Link>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={onClose}
+                fullWidth
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
+              >
+                {loading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </Modal>
+      </Modal>
+      <ForgotPassword
+        open={forgotPasswordOpen}
+        onClose={() => setForgotPasswordOpen(false)}
+      />
+    </>
   );
 }
 
