@@ -4,15 +4,10 @@
  * ⚠️  To update this interface, modify the corresponding model in the backend.
  */
 
-export interface User {
-  firstName: string | null
-  lastName: string | null
-  email: string
-  failedLoginAttempts: number
-  accountLockedUntil: string | null
-  facebookUrl: string | null
-  instagramUrl: string | null
-  profileImageUrl: string | null
+export interface Permission {
+  name: string
+  slug: string
+  description: string | null
   createdAt: string
   updatedAt: string | null
 }

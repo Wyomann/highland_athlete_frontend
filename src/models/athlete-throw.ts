@@ -4,15 +4,13 @@
  * ⚠️  To update this interface, modify the corresponding model in the backend.
  */
 
-export interface User {
-  firstName: string | null
-  lastName: string | null
-  email: string
-  failedLoginAttempts: number
-  accountLockedUntil: string | null
-  facebookUrl: string | null
-  instagramUrl: string | null
-  profileImageUrl: string | null
+export interface AthleteThrow {
+  userId: number
+  throwTypeId: number
+  classTypeId: number
+  distance: number
+  place: number
+  isPr: boolean
   createdAt: string
   updatedAt: string | null
 }
