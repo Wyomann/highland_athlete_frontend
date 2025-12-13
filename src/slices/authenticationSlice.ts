@@ -91,7 +91,7 @@ export const fetchUser = createAsyncThunk(
   'authentication/fetchUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/me`, {
         credentials: 'include', // Include cookies for session-based auth
       });
 
@@ -250,6 +250,8 @@ export const authenticationSlice = createSlice({
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
+        // Clear user if session is invalid/expired
+        state.user = null;
         state.error = action.payload as string;
       });
 

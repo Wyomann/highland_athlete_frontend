@@ -48,6 +48,9 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
   // Get reCAPTCHA site key from environment variable
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
+  // Track previous user state to detect new registrations
+  const prevUserRef = useRef(user);
+
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
@@ -67,14 +70,19 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
       if (recaptchaRef.current) {
         recaptchaRef.current.reset();
       }
+      // Reset the previous user ref when modal opens
+      prevUserRef.current = user;
     }
-  }, [open]);
-
-  // Close modal on successful registration
+  }, [open, user]);
+  
+  // Close modal only on successful registration (when user changes from null to a user)
   useEffect(() => {
-    if (user && open) {
+    // Only close if user just changed from null/undefined to a user object
+    // and the modal is open (meaning we just registered)
+    if (user && !prevUserRef.current && open) {
       onClose();
     }
+    prevUserRef.current = user;
   }, [user, open, onClose]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

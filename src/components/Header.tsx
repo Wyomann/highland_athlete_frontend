@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { AppBar, Box, Button, Link, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { AccountCircle, Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
 import SideMenu from "./SideMenu";
 import type { RootState } from "../app/store";
 import haAthleteImage from "../assets/images/ha_athlete.png";
+
+const NavLink = styled(Link)(({ theme }) => ({
+  fontWeight: 500,
+  fontSize: '1.125rem',
+  '&:hover': {
+    color: theme.palette.primary.main,
+  },
+}));
 
 function Header() {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
@@ -75,21 +84,21 @@ function Header() {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2, mr: 6 }}>
-              <Link href="#" color="text.primary" underline="none" sx={{ fontWeight: 500, "&:hover": { color: "primary.main" } }}>
+              <NavLink href="#" color="text.primary" underline="none">
                 Home
-              </Link>
-              <Link href="#" color="text.primary" underline="none" sx={{ fontWeight: 500, "&:hover": { color: "primary.main" } }}>
+              </NavLink>
+              <NavLink href="#" color="text.primary" underline="none">
                 Athletes
-              </Link>
-              <Link href="#" color="text.primary" underline="none" sx={{ fontWeight: 500, "&:hover": { color: "primary.main" } }}>
+              </NavLink>
+              <NavLink href="#" color="text.primary" underline="none">
                 Rankings
-              </Link>
-              <Link href="#" color="text.primary" underline="none" sx={{ fontWeight: 500, "&:hover": { color: "primary.main" } }}>
+              </NavLink>
+              <NavLink href="#" color="text.primary" underline="none">
                 Records
-              </Link>
-              <Link href="#" color="text.primary" underline="none" sx={{ fontWeight: 500, "&:hover": { color: "primary.main" } }}>
+              </NavLink>
+              <NavLink href="#" color="text.primary" underline="none">
                 Games
-              </Link>
+              </NavLink>
             </Box>
             <IconButton
               color="inherit"
@@ -100,7 +109,7 @@ function Header() {
               <MenuIcon />
             </IconButton>
             {user && (
-              <Button startIcon={<AccountCircle />} sx={{ display: { xs: "none", sm: "flex" } }} onClick={handleOpenSideMenu}>
+              <Button startIcon={<AccountCircle />} sx={{ display: { xs: "none", sm: "flex", fontSize: '1.125rem' } }} onClick={handleOpenSideMenu}>
                 {user.lastName && user.firstName ? `${user.lastName}, ${user.firstName}` : user.firstName || user.lastName || user.email || "My Profile"}
               </Button>
             )}

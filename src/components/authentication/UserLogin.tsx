@@ -12,7 +12,7 @@ import {
   Link,
 } from '@mui/material';
 import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-material';
-import { loginUser } from '../../slices/authenticationSlice';
+import { loginUser, fetchUser } from '../../slices/authenticationSlice';
 import type { AppDispatch, RootState } from '../../app/store';
 import ForgotPassword from './ForgotPassword';
 
@@ -23,7 +23,7 @@ interface UserLoginProps {
 
 function UserLogin({ open, onClose }: UserLoginProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, user } = useSelector((state: RootState) => state.authentication);
+  const { loading } = useSelector((state: RootState) => state.authentication);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -49,13 +49,6 @@ function UserLogin({ open, onClose }: UserLoginProps) {
       setShowPassword(false);
     }
   }, [open]);
-
-  // Close modal on successful login
-  useEffect(() => {
-    if (user && open) {
-      onClose();
-    }
-  }, [user, open, onClose]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -101,8 +94,14 @@ function UserLogin({ open, onClose }: UserLoginProps) {
       password: formData.password,
     };
 
-    await dispatch(loginUser(credentials));
-    // Modal will close via useEffect watching user state on successful login
+    const result = await dispatch(loginUser(credentials));
+    
+    // On successful login, fetch user to ensure session is established and state is updated
+    if (loginUser.fulfilled.match(result)) {
+      // Fetch user to ensure session cookies are set and user state is fully updated
+      await dispatch(fetchUser());
+      onClose();
+    }
   };
 
   const modalStyle = {
