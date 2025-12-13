@@ -1,7 +1,10 @@
-import { Box, Container, CssBaseline, ThemeProvider, Typography, createTheme, Grid } from "@mui/material";
+import { useState } from "react";
+import { Box, Container, CssBaseline, ThemeProvider, Typography, createTheme, Grid, Button } from "@mui/material";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Testimonials from "../components/Testimonials";
+import UserRegistration from "../components/authentication/UserRegistration";
+import UserLogin from "../components/authentication/UserLogin";
 
 const theme = createTheme({
   palette: {
@@ -19,6 +22,9 @@ const communityStats = [
 ];
 
 function Home() {
+  const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -49,9 +55,24 @@ function Home() {
         <Typography component="h2" variant="h4" align="center" color="text.primary" gutterBottom sx={{ fontWeight: 700 }}>
           Join the community
         </Typography>
-        <Typography variant="h5" align="center" color="text.secondary" paragraph sx={{ mb: 8 }}>
-          Supported by thousands of developers and designers
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 8 }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => setRegistrationOpen(true)}
+            sx={{ px: 4, py: 1.5 }}
+          >
+            Register
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => setLoginOpen(true)}
+            sx={{ px: 4, py: 1.5 }}
+          >
+            Login
+          </Button>
+        </Box>
         <Grid container spacing={4}>
           {communityStats.map((stat, index) => (
             <Grid size={{ xs: 6, sm: 3 }} key={index}>
@@ -71,6 +92,9 @@ function Home() {
       <Testimonials />
 
       <Footer />
+
+      <UserRegistration open={registrationOpen} onClose={() => setRegistrationOpen(false)} />
+      <UserLogin open={loginOpen} onClose={() => setLoginOpen(false)} />
     </ThemeProvider>
   );
 }
