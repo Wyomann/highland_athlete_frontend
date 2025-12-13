@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Modal,
@@ -9,8 +9,10 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  Alert,
 } from '@mui/material';
 import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-material';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { registerUser } from '../../slices/authenticationSlice';
 import type { AppDispatch, RootState } from '../../app/store';
 
@@ -39,6 +41,12 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaError, setRecaptchaError] = useState<string>('');
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  // Get reCAPTCHA site key from environment variable
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
   // Reset form when modal opens
   useEffect(() => {
@@ -53,6 +61,12 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
       setValidationErrors({});
       setShowPassword(false);
       setShowConfirmPassword(false);
+      setRecaptchaToken(null);
+      setRecaptchaError('');
+      // Reset reCAPTCHA
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
     }
   }, [open]);
 
@@ -104,6 +118,23 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
     return Object.keys(errors).length === 0;
   };
 
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+    if (token) {
+      setRecaptchaError('');
+    }
+  };
+
+  const handleRecaptchaExpired = () => {
+    setRecaptchaToken(null);
+    setRecaptchaError('reCAPTCHA verification expired. Please verify again.');
+  };
+
+  const handleRecaptchaError = () => {
+    setRecaptchaToken(null);
+    setRecaptchaError('reCAPTCHA verification failed. Please try again.');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -111,11 +142,20 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
       return;
     }
 
+    // Validate reCAPTCHA if site key is configured
+    if (recaptchaSiteKey) {
+      if (!recaptchaToken) {
+        setRecaptchaError('Please complete the reCAPTCHA verification');
+        return;
+      }
+    }
+
     const userData = {
       email: formData.email,
       password: formData.password,
       firstName: formData.firstName || undefined,
       lastName: formData.lastName || undefined,
+      recaptchaToken: recaptchaToken || undefined,
     };
 
     await dispatch(registerUser(userData));
@@ -240,6 +280,23 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
               ),
             }}
           />
+
+          {recaptchaSiteKey && (
+            <Box sx={{ mt: 2 }}>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={recaptchaSiteKey}
+                onChange={handleRecaptchaChange}
+                onExpired={handleRecaptchaExpired}
+                onError={handleRecaptchaError}
+              />
+              {recaptchaError && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {recaptchaError}
+                </Alert>
+              )}
+            </Box>
+          )}
 
           <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <Button

@@ -27,6 +27,7 @@ export const registerUser = createAsyncThunk(
     password: string;
     firstName?: string;
     lastName?: string;
+    recaptchaToken?: string;
   }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/register`, {
