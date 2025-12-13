@@ -220,7 +220,10 @@ function UserLogin({ open, onClose }: UserLoginProps) {
       </Modal>
       <ForgotPassword
         open={forgotPasswordOpen}
-        onClose={() => setForgotPasswordOpen(false)}
+        onClose={() => {
+          setForgotPasswordOpen(false);
+          onClose();
+        }}
       />
     </>
   );

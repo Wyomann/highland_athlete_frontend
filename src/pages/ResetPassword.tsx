@@ -1,33 +1,22 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
-  Paper,
-  InputAdornment,
-  IconButton,
-  Alert,
-} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { resetPassword } from '../slices/authenticationSlice';
-import type { AppDispatch, RootState } from '../app/store';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Box, Container, TextField, Button, Typography, CircularProgress, Paper, InputAdornment, IconButton, Alert } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { resetPassword } from "../slices/authenticationSlice";
+import type { AppDispatch, RootState } from "../app/store";
 
 function ResetPassword() {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.authentication);
+  const { loading } = useSelector((state: RootState) => state.authentication);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
 
   const [formData, setFormData] = useState({
-    password: '',
-    confirmPassword: '',
+    password: "",
+    confirmPassword: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<{
@@ -42,7 +31,7 @@ function ResetPassword() {
   useEffect(() => {
     if (!token) {
       setValidationErrors({
-        password: 'Reset token is missing. Please use the link from your email.',
+        password: "Reset token is missing. Please use the link from your email.",
       });
     }
   }, [token]);
@@ -65,16 +54,16 @@ function ResetPassword() {
 
     // Password validation
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters long';
+      errors.password = "Password must be at least 8 characters long";
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password';
+      errors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = "Passwords do not match";
     }
 
     setValidationErrors(errors);
@@ -86,7 +75,7 @@ function ResetPassword() {
 
     if (!token) {
       setValidationErrors({
-        password: 'Reset token is missing. Please use the link from your email.',
+        password: "Reset token is missing. Please use the link from your email.",
       });
       return;
     }
@@ -102,7 +91,7 @@ function ResetPassword() {
       setSubmitted(true);
       // Redirect to home after 3 seconds
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 3000);
     }
   };
@@ -126,14 +115,14 @@ function ResetPassword() {
     return (
       <Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>
         <Paper elevation={3} sx={{ p: 4 }}>
-          <Box sx={{ textAlign: 'center' }}>
+          <Box sx={{ textAlign: "center" }}>
             <Typography variant="h4" component="h1" gutterBottom>
               Password Reset Successful
             </Typography>
-            <Typography variant="body1" sx={{ mt: 2, mb: 3, color: 'text.secondary' }}>
+            <Typography variant="body1" sx={{ mt: 2, mb: 3, color: "text.secondary" }}>
               Your password has been successfully reset. You will be redirected to the home page shortly.
             </Typography>
-            <Button variant="contained" onClick={() => navigate('/')}>
+            <Button variant="contained" onClick={() => navigate("/")}>
               Go to Home
             </Button>
           </Box>
@@ -148,21 +137,15 @@ function ResetPassword() {
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Reset Password
         </Typography>
-        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary', textAlign: 'center' }}>
+        <Typography variant="body2" sx={{ mb: 3, color: "text.secondary", textAlign: "center" }}>
           Please enter your new password below.
         </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             label="New Password"
             name="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={formData.password}
             onChange={handleChange}
             error={!!validationErrors.password}
@@ -173,11 +156,7 @@ function ResetPassword() {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
+                  <IconButton aria-label="toggle password visibility" onClick={() => setShowPassword(!showPassword)} edge="end">
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -188,7 +167,7 @@ function ResetPassword() {
           <TextField
             label="Confirm New Password"
             name="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
+            type={showConfirmPassword ? "text" : "password"}
             value={formData.confirmPassword}
             onChange={handleChange}
             error={!!validationErrors.confirmPassword}
@@ -199,11 +178,7 @@ function ResetPassword() {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle confirm password visibility"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    edge="end"
-                  >
+                  <IconButton aria-label="toggle confirm password visibility" onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
                     {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -220,7 +195,7 @@ function ResetPassword() {
             startIcon={loading ? <CircularProgress size={20} /> : null}
             sx={{ mt: 2 }}
           >
-            {loading ? 'Resetting Password...' : 'Reset Password'}
+            {loading ? "Resetting Password..." : "Reset Password"}
           </Button>
         </Box>
       </Paper>
@@ -229,4 +204,3 @@ function ResetPassword() {
 }
 
 export default ResetPassword;
-

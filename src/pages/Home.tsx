@@ -1,16 +1,9 @@
 import { useState } from "react";
-import { Box, Container, Typography, Grid, Button } from "@mui/material";
+import { Box, Container, Typography, Button } from "@mui/material";
 import Testimonials from "../components/Testimonials";
 import UserRegistration from "../components/authentication/UserRegistration";
 import UserLogin from "../components/authentication/UserLogin";
 import haBackground from "../assets/images/ha_background.png";
-
-const communityStats = [
-  { value: "5.8M", label: "Weekly downloads on npm" },
-  { value: "93.9k", label: "Stars on GitHub" },
-  { value: "3.0k", label: "Open-source contributors" },
-  { value: "19.2k", label: "Followers on X" },
-];
 
 function Home() {
   const [registrationOpen, setRegistrationOpen] = useState(false);
@@ -65,7 +58,7 @@ function Home() {
               fontSize: { xs: "1.75rem", md: "3rem" },
             }}
           >
-              Highland Athlete Profiles and Rankings
+            Highland Athlete Profiles and Rankings
           </Typography>
           <Typography
             variant="h5"
@@ -80,15 +73,22 @@ function Home() {
               fontSize: { xs: "1rem", md: "1.5rem" },
             }}
           >
-            Track your perosnal records, compete in rankings, and connect with fellow athletes who share your passion for throwing cabers, 
-            hammers, stones, and weights for distance.
+            Track your perosnal records, compete in rankings, and connect with fellow athletes who share your passion for throwing cabers, hammers, stones, and
+            weights for distance.
           </Typography>
         </Box>
       </Container>
 
       {/* Join the Community Section */}
       <Container sx={{ py: 2, width: "100%" }}>
-        <Typography component="h2" variant="h4" align="center" color="text.primary" gutterBottom sx={{ fontWeight: 700, fontSize: { xs: "1.75rem", md: "3rem" } }}>
+        <Typography
+          component="h2"
+          variant="h4"
+          align="center"
+          color="text.primary"
+          gutterBottom
+          sx={{ fontWeight: 700, fontSize: { xs: "1.75rem", md: "3rem" } }}
+        >
           Join the community
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 8 }}>
