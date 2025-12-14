@@ -11,7 +11,7 @@ function AthleteThrows({ athleteThrows }: AthleteThrowsProps) {
     <Card>
       <CardContent>
         <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Sports /> Athlete Throws
+          <Sports className="primary-blue" /> Athlete PR Throws
         </Typography>
         {athleteThrows.length === 0 ? (
           <Typography variant="body2" color="text.secondary">

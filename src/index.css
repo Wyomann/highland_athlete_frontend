@@ -64,3 +64,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.primary-blue {
+  color: rgb(0, 115, 230) !important;
+}

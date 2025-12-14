@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -11,15 +11,17 @@ import {
   Stack,
 } from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
-import type { RootState } from '../app/store';
+import type { RootState, AppDispatch } from '../app/store';
 import type { AthleteThrow } from '../models/athlete-throw';
 import type { AthleteLift } from '../models/athlete-lift';
+import { fetchUser } from '../slices/authenticationSlice';
 import PersonalInformation from '../components/profile/PersonalInformation';
 import AthleteThrows from '../components/profile/AthleteThrows';
 import AthleteLifts from '../components/profile/AthleteLifts';
 
 function MyProfile() {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.authentication);
 
   if (!user) {
@@ -44,9 +46,15 @@ function MyProfile() {
     ? `${user.firstName} ${user.lastName}`
     : user.firstName || user.lastName || 'User';
 
-  // Placeholder data - these would typically come from API calls
-  const athleteThrows: AthleteThrow[] = [];
-  const athleteLifts: AthleteLift[] = [];
+  // Extract athlete lifts and throws from user object
+  // These are included in the user object from the backend but not in the TypeScript interface
+  const athleteLifts = ((user as any)?.athleteLifts || []) as AthleteLift[];
+  const athleteThrows = ((user as any)?.athleteThrows || []) as AthleteThrow[];
+
+  // Handle lift added callback - refetch user to get updated data
+  const handleLiftAdded = () => {
+    dispatch(fetchUser());
+  };
 
   return (
     <Box sx={{ width: '100%', p: 3 }}>
@@ -86,7 +94,7 @@ function MyProfile() {
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Stack spacing={3}>
               <AthleteThrows athleteThrows={athleteThrows} />
-              <AthleteLifts athleteLifts={athleteLifts} />
+              <AthleteLifts athleteLifts={athleteLifts} onLiftAdded={handleLiftAdded} />
             </Stack>
           </Box>
         </Box>

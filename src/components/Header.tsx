@@ -1,6 +1,22 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { AppBar, Box, Button, Link, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import {
+  AppBar,
+  Box,
+  Button,
+  Link,
+  Toolbar,
+  Typography,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { AccountCircle, Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
 import SideMenu from "./SideMenu";
@@ -9,13 +25,14 @@ import haAthleteImage from "../assets/images/ha_athlete.png";
 
 const NavLink = styled(Link)(({ theme }) => ({
   fontWeight: 500,
-  fontSize: '1.125rem',
-  '&:hover': {
+  fontSize: "1.125rem",
+  "&:hover": {
     color: theme.palette.primary.main,
   },
 }));
 
 function Header() {
+  const navigate = useNavigate();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const user = useSelector((state: RootState) => state.authentication.user);
@@ -84,7 +101,16 @@ function Header() {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2, mr: 6 }}>
-              <NavLink href="#" color="text.primary" underline="none">
+              <NavLink
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/");
+                }}
+                color="text.primary"
+                underline="none"
+                sx={{ cursor: "pointer", background: "none", border: "none", padding: 0 }}
+              >
                 Home
               </NavLink>
               <NavLink href="#" color="text.primary" underline="none">
@@ -100,16 +126,15 @@ function Header() {
                 Games
               </NavLink>
             </Box>
-            <IconButton
-              color="inherit"
-              aria-label="open navigation menu"
-              onClick={handleOpenNavMenu}
-              sx={{ display: { xs: "flex", md: "none" } }}
-            >
-              <MenuIcon />
+            <IconButton color="inherit" aria-label="open navigation menu" onClick={handleOpenNavMenu} sx={{ display: { xs: "flex", md: "none" } }}>
+              <MenuIcon className="primary-blue" />
             </IconButton>
             {user && (
-              <Button startIcon={<AccountCircle />} sx={{ display: { xs: "none", sm: "flex", fontSize: '1.125rem' } }} onClick={handleOpenSideMenu}>
+              <Button
+                startIcon={<AccountCircle />}
+                sx={{ display: { xs: "none", sm: "flex", fontSize: "1.125rem" } }}
+                onClick={handleOpenSideMenu}
+              >
                 {user.lastName && user.firstName ? `${user.lastName}, ${user.firstName}` : user.firstName || user.lastName || user.email || "My Profile"}
               </Button>
             )}
@@ -133,14 +158,23 @@ function Header() {
             Navigation
           </Typography>
           <IconButton onClick={handleCloseNavMenu} aria-label="close navigation menu">
-            <CloseIcon />
+            <CloseIcon className="primary-blue" />
           </IconButton>
         </Box>
         <Divider />
         <List>
           {navigationLinks.map((link) => (
             <ListItem key={link.label} disablePadding>
-              <ListItemButton component={Link} href={link.href} onClick={handleCloseNavMenu}>
+              <ListItemButton
+                onClick={() => {
+                  if (link.label === "Home") {
+                    navigate("/");
+                  } else {
+                    // Handle other links as needed
+                  }
+                  handleCloseNavMenu();
+                }}
+              >
                 <ListItemText primary={link.label} />
               </ListItemButton>
             </ListItem>
@@ -156,10 +190,12 @@ function Header() {
                   }}
                 >
                   <ListItemIcon>
-                    <AccountCircle />
+                    <AccountCircle className="primary-blue" />
                   </ListItemIcon>
                   <ListItemText
-                    primary={user.lastName && user.firstName ? `${user.lastName}, ${user.firstName}` : user.firstName || user.lastName || user.email || "My Profile"}
+                    primary={
+                      user.lastName && user.firstName ? `${user.lastName}, ${user.firstName}` : user.firstName || user.lastName || user.email || "My Profile"
+                    }
                   />
                 </ListItemButton>
               </ListItem>

@@ -205,7 +205,7 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
             onClick={onClose}
             sx={{ color: 'text.secondary' }}
           >
-            <CloseIcon />
+            <CloseIcon className="primary-blue" />
           </IconButton>
         </Box>
 
@@ -260,7 +260,7 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
                     onClick={() => setShowPassword(!showPassword)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <VisibilityOff className="primary-blue" /> : <Visibility className="primary-blue" />}
                   </IconButton>
                 </InputAdornment>
               ),

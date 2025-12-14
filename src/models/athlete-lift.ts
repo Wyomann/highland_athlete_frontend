@@ -10,6 +10,7 @@ export interface AthleteLift {
   weight: number
   isPr: boolean
   isCurrentPr: boolean
+  videoUrl: string | null
   createdAt: string
   updatedAt: string | null
 }

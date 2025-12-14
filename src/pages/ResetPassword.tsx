@@ -157,7 +157,7 @@ function ResetPassword() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton aria-label="toggle password visibility" onClick={() => setShowPassword(!showPassword)} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <VisibilityOff className="primary-blue" /> : <Visibility className="primary-blue" />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -179,7 +179,7 @@ function ResetPassword() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton aria-label="toggle confirm password visibility" onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    {showConfirmPassword ? <VisibilityOff className="primary-blue" /> : <Visibility className="primary-blue" />}
                   </IconButton>
                 </InputAdornment>
               ),

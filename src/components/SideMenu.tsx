@@ -19,6 +19,7 @@ function SideMenu({ open, onClose }: SideMenuProps) {
   const handleLogout = async () => {
     await dispatch(logoutUser());
     onClose();
+    navigate('/');
   };
 
   const handleProfileClick = () => {
@@ -47,7 +48,7 @@ function SideMenu({ open, onClose }: SideMenuProps) {
           {displayName}
         </Typography>
         <IconButton onClick={onClose} aria-label="close drawer">
-          <CloseIcon />
+          <CloseIcon className="primary-blue" />
         </IconButton>
       </Box>
       <Divider />
@@ -56,7 +57,7 @@ function SideMenu({ open, onClose }: SideMenuProps) {
           <ListItem disablePadding>
             <ListItemButton onClick={handleProfileClick}>
               <ListItemIcon>
-                <AccountCircle />
+                <AccountCircle className="primary-blue" />
               </ListItemIcon>
               <ListItemText primary="Profile" />
             </ListItemButton>
@@ -64,7 +65,7 @@ function SideMenu({ open, onClose }: SideMenuProps) {
           <ListItem disablePadding>
             <ListItemButton>
               <ListItemIcon>
-                <Settings />
+                <Settings className="primary-blue" />
               </ListItemIcon>
               <ListItemText primary="Settings" />
             </ListItemButton>
@@ -73,7 +74,7 @@ function SideMenu({ open, onClose }: SideMenuProps) {
           <ListItem disablePadding>
             <ListItemButton onClick={handleLogout}>
               <ListItemIcon>
-                <Logout />
+                <Logout className="primary-blue" />
               </ListItemIcon>
               <ListItemText primary="Logout" />
             </ListItemButton>

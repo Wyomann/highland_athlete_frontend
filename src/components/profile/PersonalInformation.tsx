@@ -150,7 +150,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Person /> Personal Information
+            <Person className="primary-blue" /> Personal Information
           </Typography>
           {!isEditing ? (
             <Button
@@ -182,12 +182,6 @@ function PersonalInformation({ user }: PersonalInformationProps) {
           )}
         </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <TextField
             label="First Name"
@@ -218,7 +212,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Email />
+                  <Email className="primary-blue" />
                 </InputAdornment>
               ),
             }}
@@ -236,7 +230,20 @@ function PersonalInformation({ user }: PersonalInformationProps) {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Facebook />
+                  {!isEditing && formData.facebookUrl ? (
+                    <IconButton
+                      component="a"
+                      href={formData.facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      size="small"
+                      aria-label="Open Facebook profile"
+                    >
+                      <Facebook className="primary-blue" />
+                    </IconButton>
+                  ) : (
+                    <Facebook className="primary-blue" />
+                  )}
                 </InputAdornment>
               ),
             }}
@@ -253,7 +260,20 @@ function PersonalInformation({ user }: PersonalInformationProps) {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Instagram />
+                  {!isEditing && formData.instagramUrl ? (
+                    <IconButton
+                      component="a"
+                      href={formData.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      size="small"
+                      aria-label="Open Instagram profile"
+                    >
+                      <Instagram className="primary-blue" />
+                    </IconButton>
+                  ) : (
+                    <Instagram className="primary-blue" />
+                  )}
                 </InputAdornment>
               ),
             }}
@@ -264,7 +284,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
               <Divider sx={{ my: 2 }} />
               <Box>
                 <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Lock fontSize="small" /> Change Password (optional)
+                  <Lock fontSize="small" className="primary-blue" /> Change Password (optional)
                 </Typography>
                 <TextField
                   label="New Password"
@@ -285,7 +305,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
                         >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                          {showPassword ? <VisibilityOff className="primary-blue" /> : <Visibility className="primary-blue" />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -310,7 +330,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           edge="end"
                         >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                          {showConfirmPassword ? <VisibilityOff className="primary-blue" /> : <Visibility className="primary-blue" />}
                         </IconButton>
                       </InputAdornment>
                     ),

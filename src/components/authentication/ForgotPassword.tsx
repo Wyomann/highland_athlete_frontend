@@ -100,7 +100,7 @@ function ForgotPassword({ open, onClose }: ForgotPasswordProps) {
             onClick={onClose}
             sx={{ color: 'text.secondary' }}
           >
-            <CloseIcon />
+            <CloseIcon className="primary-blue" />
           </IconButton>
         </Box>
 
