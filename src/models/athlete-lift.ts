@@ -8,6 +8,8 @@ export interface AthleteLift {
   userId: number
   liftTypeId: number
   weight: number
+  isPr: boolean
+  isCurrentPr: boolean
   createdAt: string
   updatedAt: string | null
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Modal,
   Box,
@@ -23,6 +24,7 @@ interface UserLoginProps {
 
 function UserLogin({ open, onClose }: UserLoginProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { loading } = useSelector((state: RootState) => state.authentication);
 
   const [formData, setFormData] = useState({
@@ -101,6 +103,8 @@ function UserLogin({ open, onClose }: UserLoginProps) {
       // Fetch user to ensure session cookies are set and user state is fully updated
       await dispatch(fetchUser());
       onClose();
+      // Redirect to MyProfile page
+      navigate('/my-profile');
     }
   };
 

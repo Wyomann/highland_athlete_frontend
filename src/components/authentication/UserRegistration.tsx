@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Modal,
   Box,
@@ -23,6 +24,7 @@ interface UserRegistrationProps {
 
 function UserRegistration({ open, onClose }: UserRegistrationProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { loading, user } = useSelector((state: RootState) => state.authentication);
 
   const [formData, setFormData] = useState({
@@ -81,9 +83,11 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
     // and the modal is open (meaning we just registered)
     if (user && !prevUserRef.current && open) {
       onClose();
+      // Redirect to MyProfile page
+      navigate('/my-profile');
     }
     prevUserRef.current = user;
-  }, [user, open, onClose]);
+  }, [user, open, onClose, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

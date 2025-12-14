@@ -192,6 +192,41 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+// Update user async thunk
+export const updateUser = createAsyncThunk(
+  'authentication/updateUser',
+  async (userData: {
+    firstName?: string | null;
+    lastName?: string | null;
+    facebookUrl?: string | null;
+    instagramUrl?: string | null;
+    password?: string;
+  }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to update user');
+      }
+
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to update user'
+      );
+    }
+  }
+);
+
 export const authenticationSlice = createSlice({
   name: 'authentication',
   initialState,
@@ -299,6 +334,22 @@ export const authenticationSlice = createSlice({
         state.error = null;
       })
       .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update user
+    builder
+      .addCase(updateUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

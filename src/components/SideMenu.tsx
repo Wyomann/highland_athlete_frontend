@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Drawer, Box, Typography, IconButton, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { Close as CloseIcon, AccountCircle, Settings, Logout } from "@mui/icons-material";
 import { logoutUser } from "../slices/authenticationSlice";
@@ -11,11 +12,17 @@ interface SideMenuProps {
 
 function SideMenu({ open, onClose }: SideMenuProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.authentication.user);
   const drawerWidth = 320;
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
+    onClose();
+  };
+
+  const handleProfileClick = () => {
+    navigate('/my-profile');
     onClose();
   };
 
@@ -47,7 +54,7 @@ function SideMenu({ open, onClose }: SideMenuProps) {
       <Box sx={{ p: 2 }}>
         <List>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={handleProfileClick}>
               <ListItemIcon>
                 <AccountCircle />
               </ListItemIcon>

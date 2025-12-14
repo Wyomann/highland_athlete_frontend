@@ -1,6 +1,7 @@
 import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import authenticationReducer, { registerUser, loginUser, logoutUser, forgotPassword, resetPassword } from "../slices/authenticationSlice";
+import authenticationReducer, { registerUser, loginUser, logoutUser, forgotPassword, resetPassword, updateUser } from "../slices/authenticationSlice";
+import sharedReducer from "../slices/sharedSlice";
 
 // Create the listener middleware
 const listenerMiddleware = createListenerMiddleware();
@@ -91,9 +92,27 @@ listenerMiddleware.startListening({
   },
 });
 
+// Listen for update user success
+listenerMiddleware.startListening({
+  actionCreator: updateUser.fulfilled,
+  effect: () => {
+    toast.success("Profile updated successfully!");
+  },
+});
+
+// Listen for update user errors
+listenerMiddleware.startListening({
+  actionCreator: updateUser.rejected,
+  effect: (action) => {
+    const errorMessage = action.payload as string || "Failed to update profile. Please try again.";
+    toast.error(errorMessage);
+  },
+});
+
 export const store = configureStore({
   reducer: {
     authentication: authenticationReducer,
+    shared: sharedReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware),
