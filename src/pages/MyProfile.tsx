@@ -1,5 +1,7 @@
+import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   Container,
   Paper,
@@ -9,12 +11,14 @@ import {
   Divider,
   Button,
   Stack,
+  IconButton,
+  CircularProgress,
 } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, CameraAlt } from '@mui/icons-material';
 import type { RootState, AppDispatch } from '../app/store';
 import type { AthleteThrow } from '../models/athlete-throw';
 import type { AthleteLift } from '../models/athlete-lift';
-import { fetchUser } from '../slices/authenticationSlice';
+import { fetchUser, uploadProfileImage } from '../slices/authenticationSlice';
 import PersonalInformation from '../components/profile/PersonalInformation';
 import AthleteThrows from '../components/profile/AthleteThrows';
 import AthleteLifts from '../components/profile/AthleteLifts';
@@ -22,7 +26,9 @@ import AthleteLifts from '../components/profile/AthleteLifts';
 function MyProfile() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.authentication);
+  const { user, loading } = useSelector((state: RootState) => state.authentication);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   if (!user) {
     return (
@@ -56,24 +62,93 @@ function MyProfile() {
     dispatch(fetchUser());
   };
 
+  // Handle profile image upload
+  const handleImageUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      await dispatch(uploadProfileImage(file)).unwrap();
+      // Optionally refetch user to ensure we have the latest data
+      await dispatch(fetchUser());
+      toast.success('Profile image uploaded successfully!');
+    } catch (error) {
+      console.error('Failed to upload profile image:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload profile image');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <Box sx={{ width: '100%', p: 3 }}>
       {/* Header Section */}
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-          <Avatar
-            src={user.profileImageUrl || undefined}
-            sx={{
-              width: 120,
-              height: 120,
-              mb: 2,
-              bgcolor: 'primary.main',
-              fontSize: '3rem',
-            }}
-          >
-            {user.profileImageUrl ? null : (
-              <AccountCircle sx={{ width: 120, height: 120 }} />
-            )}
-          </Avatar>
+          <Box sx={{ position: 'relative', mb: 2 }}>
+            <Avatar
+              src={user.profileImageUrl || undefined}
+              sx={{
+                width: 120,
+                height: 120,
+                bgcolor: 'primary.main',
+                fontSize: '3rem',
+              }}
+            >
+              {!user.profileImageUrl && (
+                <AccountCircle sx={{ width: 120, height: 120 }} />
+              )}
+            </Avatar>
+            <IconButton
+              onClick={handleImageUploadClick}
+              disabled={uploading || loading}
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                },
+                border: '2px solid white',
+              }}
+              size="small"
+            >
+              {uploading ? (
+                <CircularProgress size={20} sx={{ color: 'white' }} />
+              ) : (
+                <CameraAlt />
+              )}
+            </IconButton>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </Box>
           <Typography variant="h4" component="h1" gutterBottom>
             {displayName}
           </Typography>

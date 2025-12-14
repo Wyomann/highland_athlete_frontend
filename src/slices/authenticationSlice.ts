@@ -227,6 +227,35 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+// Upload profile image async thunk
+export const uploadProfileImage = createAsyncThunk(
+  'authentication/uploadProfileImage',
+  async (file: File, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const response = await fetch(`${API_BASE_URL}/api/users/me/profile-image`, {
+        method: 'POST',
+        credentials: 'include', // Include cookies for session-based auth
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to upload profile image');
+      }
+
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to upload profile image'
+      );
+    }
+  }
+);
+
 export const authenticationSlice = createSlice({
   name: 'authentication',
   initialState,
@@ -350,6 +379,22 @@ export const authenticationSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Upload profile image
+    builder
+      .addCase(uploadProfileImage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadProfileImage.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(uploadProfileImage.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
