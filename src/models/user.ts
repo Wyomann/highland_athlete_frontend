@@ -8,11 +8,15 @@ export interface User {
   firstName: string | null
   lastName: string | null
   email: string
+  currentClassTypeId: number | null
   failedLoginAttempts: number
   accountLockedUntil: string | null
   facebookUrl: string | null
   instagramUrl: string | null
   profileImageUrl: string | null
+  height: number | null
+  weight: number | null
+  dateOfBirth: string | null
   createdAt: string
   updatedAt: string | null
 }

@@ -201,6 +201,10 @@ export const updateUser = createAsyncThunk(
     facebookUrl?: string | null;
     instagramUrl?: string | null;
     password?: string;
+    height?: number | null;
+    weight?: number | null;
+    dateOfBirth?: string | null;
+    currentClassTypeId?: number | null;
   }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/users/me`, {
