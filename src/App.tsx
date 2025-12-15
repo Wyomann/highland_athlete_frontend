@@ -8,6 +8,7 @@ import AuthInitializer from './components/AuthInitializer'
 import Home from './pages/Home'
 import ResetPassword from './pages/ResetPassword'
 import MyProfile from './pages/MyProfile'
+import LiftRankings from './pages/LiftRankings'
 import './App.css'
 
 const theme = createTheme({
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/my-profile" element={<MyProfile />} />
+          <Route path="/rankings/lifts" element={<LiftRankings />} />
         </Routes>
         <Footer />
         <ToastContainer

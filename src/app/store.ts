@@ -2,6 +2,7 @@ import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import authenticationReducer, { registerUser, loginUser, logoutUser, forgotPassword, resetPassword, updateUser } from "../slices/authenticationSlice";
 import sharedReducer from "../slices/sharedSlice";
+import liftRankingsReducer from "../slices/liftRankingsSlice";
 
 // Create the listener middleware
 const listenerMiddleware = createListenerMiddleware();
@@ -113,6 +114,7 @@ export const store = configureStore({
   reducer: {
     authentication: authenticationReducer,
     shared: sharedReducer,
+    liftRankings: liftRankingsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware),

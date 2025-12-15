@@ -16,9 +16,11 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { AccountCircle, Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
+import { AccountCircle, Menu as MenuIcon, Close as CloseIcon, ArrowDropDown } from "@mui/icons-material";
 import SideMenu from "./SideMenu";
 import type { RootState } from "../app/store";
 import haAthleteImage from "../assets/images/ha_athlete.png";
@@ -35,6 +37,7 @@ function Header() {
   const navigate = useNavigate();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
+  const [rankingsAnchorEl, setRankingsAnchorEl] = useState<null | HTMLElement>(null);
   const user = useSelector((state: RootState) => state.authentication.user);
 
   const handleOpenSideMenu = () => {
@@ -51,6 +54,17 @@ function Header() {
 
   const handleCloseNavMenu = () => {
     setNavMenuOpen(false);
+  };
+
+  const rankingsMenuOpen = Boolean(rankingsAnchorEl);
+  const handleRankingsMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
+    // Only set anchor if not already set (prevents menu from moving when hovering over it)
+    if (!rankingsAnchorEl) {
+      setRankingsAnchorEl(event.currentTarget);
+    }
+  };
+  const handleRankingsMouseLeave = () => {
+    setRankingsAnchorEl(null);
   };
 
   const navigationLinks = [
@@ -116,9 +130,86 @@ function Header() {
               <NavLink href="#" color="text.primary" underline="none">
                 Athletes
               </NavLink>
-              <NavLink href="#" color="text.primary" underline="none">
-                Rankings
-              </NavLink>
+              <Box
+                sx={{ display: "flex", alignItems: "center" }}
+                onMouseEnter={handleRankingsMouseEnter}
+                onMouseLeave={handleRankingsMouseLeave}
+              >
+                <Button
+                  endIcon={<ArrowDropDown />}
+                  sx={{
+                    color: "text.primary",
+                    fontWeight: 500,
+                    fontSize: "1.125rem",
+                    textTransform: "none",
+                    "&:hover": {
+                      color: "primary.main",
+                      background: "none",
+                    },
+                  }}
+                  aria-controls={rankingsMenuOpen ? "rankings-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={rankingsMenuOpen ? "true" : undefined}
+                >
+                  Rankings
+                </Button>
+                <Menu
+                  anchorEl={rankingsAnchorEl}
+                  id="rankings-menu"
+                  open={rankingsMenuOpen}
+                  onClose={handleRankingsMouseLeave}
+                  MenuListProps={{
+                    onMouseLeave: handleRankingsMouseLeave,
+                  }}
+                  slotProps={{
+                    paper: {
+                      elevation: 0,
+                      onMouseLeave: handleRankingsMouseLeave,
+                      sx: {
+                        overflow: "visible",
+                        filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                        mt: 1.5,
+                        "& .MuiAvatar-root": {
+                          width: 32,
+                          height: 32,
+                          ml: -0.5,
+                          mr: 1,
+                        },
+                        "&::before": {
+                          content: '""',
+                          display: "block",
+                          position: "absolute",
+                          top: 0,
+                          right: 14,
+                          width: 10,
+                          height: 10,
+                          bgcolor: "background.paper",
+                          transform: "translateY(-50%) rotate(45deg)",
+                          zIndex: 0,
+                        },
+                      },
+                    },
+                  }}
+                  transformOrigin={{ horizontal: "right", vertical: "top" }}
+                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                >
+                  <MenuItem>
+                    <ListItemText primary="Highland Athlete Throw Rankings" />
+                  </MenuItem>
+                  <MenuItem>
+                    <ListItemText primary="IHGF Throw Rankings" />
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/rankings/lifts");
+                      handleRankingsMouseLeave();
+                    }}
+                  >
+                    <ListItemText primary="Highland Athlete Lift Rankings" />
+                  </MenuItem>
+                </Menu>
+              </Box>
               <NavLink href="#" color="text.primary" underline="none">
                 Records
               </NavLink>

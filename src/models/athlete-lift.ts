@@ -5,6 +5,7 @@
  */
 
 export interface AthleteLift {
+  id: number
   userId: number
   liftTypeId: number
   weight: number

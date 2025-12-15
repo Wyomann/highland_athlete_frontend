@@ -5,6 +5,7 @@
  */
 
 export interface AthleteThrow {
+  id: number
   userId: number
   throwTypeId: number
   classTypeId: number

@@ -5,6 +5,7 @@
  */
 
 export interface LiftType {
+  id: number
   name: string
   maxAmount: number
   createdAt: string
