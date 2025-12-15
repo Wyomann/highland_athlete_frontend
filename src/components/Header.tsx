@@ -142,6 +142,9 @@ function Header() {
                     fontWeight: 500,
                     fontSize: "1.125rem",
                     textTransform: "none",
+                    padding: 0,
+                    minWidth: "auto",
+                    lineHeight: "inherit",
                     "&:hover": {
                       color: "primary.main",
                       background: "none",

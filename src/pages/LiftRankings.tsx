@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, FormControl, InputLabel, Select, MenuItem, CircularProgress, IconButton } from "@mui/material";
-import { DataGrid, type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid, type GridColDef, type GridRenderCellParams, type GridPaginationModel } from "@mui/x-data-grid";
 import { FitnessCenter, Videocam } from "@mui/icons-material";
 import type { RootState, AppDispatch } from "../app/store";
 import { fetchAthleteLifts, setClassTypeFilter, setLiftTypeFilter, setPrTypeFilter } from "../slices/liftRankingsSlice";
@@ -15,6 +15,7 @@ function LiftRankings() {
   const liftTypes = useSelector((state: RootState) => state.shared.liftTypes);
   const { athleteLiftRankings, loading, filters } = useSelector((state: RootState) => state.liftRankings);
   const initializedRef = useRef(false);
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
 
   // Initialize filters from URL params if they exist, otherwise use defaults
   useEffect(() => {
@@ -63,19 +64,19 @@ function LiftRankings() {
   useEffect(() => {
     if (initializedRef.current) {
       const newParams = new URLSearchParams();
-      
+
       if (filters.classTypeId !== null && filters.classTypeId !== 0) {
         newParams.set("classTypeId", filters.classTypeId.toString());
       }
-      
+
       if (filters.liftTypeId !== null) {
         newParams.set("liftTypeId", filters.liftTypeId.toString());
       }
-      
+
       if (filters.prType && filters.prType !== "current") {
         newParams.set("prType", filters.prType);
       }
-      
+
       setSearchParams(newParams, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,6 +114,7 @@ function LiftRankings() {
   // Prepare data for DataGrid with unique IDs
   const rows = displayRankings.map((ranking, index) => ({
     id: `${ranking.firstName}-${ranking.lastName}-${ranking.liftType.id}-${index}`,
+    rank: index + 1,
     athleteName: getUserName(ranking),
     currentClass: getClassTypeName(ranking.currentClassTypeId),
     liftType: ranking.liftType.name,
@@ -122,11 +124,9 @@ function LiftRankings() {
   }));
 
   const columns: GridColDef[] = [
+    { field: "rank", headerName: "Rank", type: "number", width: 80, align: "center", headerAlign: "center" },
     { field: "athleteName", headerName: "Athlete Name", flex: 1, minWidth: 150 },
-    { field: "currentClass", headerName: "Current Class", flex: 1, minWidth: 150 },
-    { field: "liftType", headerName: "Lift Type", flex: 1, minWidth: 150 },
-    { field: "weight", headerName: "Weight (lbs)", flex: 1, minWidth: 120 },
-    { field: "prType", headerName: "PR Type", flex: 1, minWidth: 120 },
+    { field: "weight", headerName: "Weight (lbs)", type: "number", flex: 1, minWidth: 120 },
     {
       field: "videoUrl",
       headerName: "Video",
@@ -147,10 +147,13 @@ function LiftRankings() {
         );
       },
     },
+    { field: "currentClass", headerName: "Current Class", flex: 1, minWidth: 150 },
+    { field: "liftType", headerName: "Lift Type", flex: 1, minWidth: 150 },
+    { field: "prType", headerName: "PR Type", flex: 1, minWidth: 120 },
   ];
 
   return (
-    <Box sx={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Box sx={{ p: 3, flexShrink: 0 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <FitnessCenter className="primary-blue" />
@@ -163,7 +166,7 @@ function LiftRankings() {
         {/* Filters */}
         <Paper sx={{ p: 2 }}>
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <FormControl sx={{ minWidth: 300 }}>
+            <FormControl sx={{ width: { xs: "100%", sm: "auto" }, minWidth: { xs: "100%", sm: 300 } }}>
               <InputLabel>Athlete's Current Class</InputLabel>
               <Select
                 value={filters.classTypeId ?? 0}
@@ -184,7 +187,7 @@ function LiftRankings() {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 200 }}>
+            <FormControl sx={{ width: { xs: "100%", sm: "auto" }, minWidth: { xs: "100%", sm: 200 } }}>
               <InputLabel>Lift Type</InputLabel>
               <Select
                 value={filters.liftTypeId || (liftTypes.length > 0 ? liftTypes[0].id : "")}
@@ -202,7 +205,7 @@ function LiftRankings() {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 200 }}>
+            <FormControl sx={{ width: { xs: "100%", sm: "auto" }, minWidth: { xs: "100%", sm: 200 } }}>
               <InputLabel>PR Type</InputLabel>
               <Select value={filters.prType} label="PR Type" onChange={(e) => dispatch(setPrTypeFilter(e.target.value as "all" | "current" | "allTime"))}>
                 <MenuItem value="current">Current PRs</MenuItem>
@@ -214,24 +217,37 @@ function LiftRankings() {
       </Box>
 
       {/* Rankings DataGrid */}
-      <Box sx={{ flex: 1, overflow: "hidden", px: 3, pb: 3 }}>
+      <Box
+        sx={{
+          flex: { xs: "0 1 auto", sm: 1 },
+          overflow: { xs: "visible", sm: "visible" },
+          px: 3,
+          pb: 3,
+          "& *::-webkit-scrollbar": {
+            display: "none",
+          },
+          "& *": {
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          },
+        }}
+      >
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
             <CircularProgress />
           </Box>
         ) : (
-          <Paper sx={{ height: "100%", width: "100%" }}>
+          <Paper sx={{ width: "100%" }}>
             <DataGrid
               rows={rows}
               columns={columns}
               pageSizeOptions={[25, 50, 100]}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 25 },
-                },
-              }}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              pagination
               disableRowSelectionOnClick
               sx={{
+                height: "auto",
                 border: 0,
                 "& .MuiDataGrid-cell:focus": {
                   outline: "none",
@@ -243,6 +259,32 @@ function LiftRankings() {
                 "& .MuiDataGrid-columnHeaderTitle": {
                   fontWeight: "bold",
                 },
+                "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
+                  display: "none",
+                },
+                "& .MuiDataGrid-virtualScroller": {
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                },
+                "& .MuiDataGrid-main::-webkit-scrollbar": {
+                  display: "none",
+                },
+                "& .MuiDataGrid-main": {
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                },
+                "& .MuiDataGrid-root::-webkit-scrollbar": {
+                  display: "none",
+                },
+                "& .MuiDataGrid-root": {
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                },
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                },
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
               }}
               slots={{
                 noRowsOverlay: () => (
