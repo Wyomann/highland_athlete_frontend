@@ -15,6 +15,8 @@ function LiftRankings() {
   const liftTypes = useSelector((state: RootState) => state.shared.liftTypes);
   const { athleteLiftRankings, loading, filters } = useSelector((state: RootState) => state.liftRankings);
   const initializedRef = useRef(false);
+  const hasInitialFetchRef = useRef(false);
+  const prevFiltersRef = useRef<{ classTypeId: number | null; liftTypeId: number | null; prType: "all" | "current" | "allTime" } | null>(null);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
 
   // Initialize filters from URL params if they exist, otherwise use defaults
@@ -60,6 +62,27 @@ function LiftRankings() {
     }
   }, [dispatch, liftTypes, classTypes, searchParams]);
 
+  // Initial fetch after filters are initialized (only once)
+  useEffect(() => {
+    if (initializedRef.current && !hasInitialFetchRef.current && filters.liftTypeId !== null && filters.prType) {
+      // Use a small timeout to ensure all filter dispatches have completed
+      const timeoutId = setTimeout(() => {
+        if (!hasInitialFetchRef.current) {
+          hasInitialFetchRef.current = true;
+          const currentFilters = {
+            classTypeId: filters.classTypeId === 0 || filters.classTypeId === null ? null : filters.classTypeId,
+            liftTypeId: filters.liftTypeId,
+            prType: filters.prType,
+          };
+          prevFiltersRef.current = currentFilters;
+          dispatch(fetchAthleteLifts(currentFilters));
+        }
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [dispatch, filters.classTypeId, filters.liftTypeId, filters.prType]);
+
   // Update URL params when filters change
   useEffect(() => {
     if (initializedRef.current) {
@@ -82,16 +105,26 @@ function LiftRankings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.classTypeId, filters.liftTypeId, filters.prType]);
 
+  // Fetch data when filters change (after initial fetch)
   useEffect(() => {
-    // Only fetch data when lift type is set (required filter)
-    if (filters.liftTypeId !== null && initializedRef.current) {
-      dispatch(
-        fetchAthleteLifts({
-          classTypeId: filters.classTypeId === 0 || filters.classTypeId === null ? null : filters.classTypeId,
-          liftTypeId: filters.liftTypeId,
-          prType: filters.prType,
-        })
-      );
+    // Only fetch if we've done the initial fetch and filters have actually changed
+    if (hasInitialFetchRef.current && filters.liftTypeId !== null) {
+      const currentFilters = {
+        classTypeId: filters.classTypeId === 0 || filters.classTypeId === null ? null : filters.classTypeId,
+        liftTypeId: filters.liftTypeId,
+        prType: filters.prType,
+      };
+
+      const prevFilters = prevFiltersRef.current;
+      if (
+        prevFilters &&
+        (prevFilters.classTypeId !== currentFilters.classTypeId ||
+          prevFilters.liftTypeId !== currentFilters.liftTypeId ||
+          prevFilters.prType !== currentFilters.prType)
+      ) {
+        prevFiltersRef.current = currentFilters;
+        dispatch(fetchAthleteLifts(currentFilters));
+      }
     }
   }, [dispatch, filters.classTypeId, filters.liftTypeId, filters.prType]);
 
