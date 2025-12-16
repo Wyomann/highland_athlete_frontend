@@ -16,6 +16,8 @@ import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-materi
 import ReCAPTCHA from 'react-google-recaptcha';
 import { registerUser } from '../../slices/authenticationSlice';
 import type { AppDispatch, RootState } from '../../app/store';
+import { validateEmail, validatePassword, validatePasswordConfirmation, authModalStyle } from '../../utils/authUtils';
+import FacebookAuthButton from './FacebookAuthButton';
 
 interface UserRegistrationProps {
   open: boolean;
@@ -106,24 +108,21 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
     const errors: typeof validationErrors = {};
 
     // Email validation
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      errors.email = emailError;
     }
 
     // Password validation
-    if (!formData.password) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
+    const passwordError = validatePassword(formData.password, { requireMinLength: true, minLength: 8 });
+    if (passwordError) {
+      errors.password = passwordError;
     }
 
     // Confirm password validation
-    if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+    const confirmPasswordError = validatePasswordConfirmation(formData.password, formData.confirmPassword);
+    if (confirmPasswordError) {
+      errors.confirmPassword = confirmPasswordError;
     }
 
     setValidationErrors(errors);
@@ -174,19 +173,6 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
     // Modal will close via useEffect watching user state on successful registration
   };
 
-  const modalStyle = {
-    position: 'absolute' as const,
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: { xs: '90%', sm: 500 },
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    borderRadius: 2,
-    p: 4,
-    maxHeight: '90vh',
-    overflow: 'auto',
-  };
 
   return (
     <Modal
@@ -195,7 +181,7 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
       aria-labelledby="registration-modal-title"
       aria-describedby="registration-modal-description"
     >
-      <Box sx={modalStyle}>
+      <Box sx={authModalStyle}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography id="registration-modal-title" variant="h5" component="h2">
             Create Account
@@ -208,6 +194,8 @@ function UserRegistration({ open, onClose }: UserRegistrationProps) {
             <CloseIcon className="primary-blue" />
           </IconButton>
         </Box>
+
+        <FacebookAuthButton label="Register with Facebook" />
 
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField

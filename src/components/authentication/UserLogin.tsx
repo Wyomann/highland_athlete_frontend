@@ -16,6 +16,8 @@ import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-materi
 import { loginUser, fetchUser } from '../../slices/authenticationSlice';
 import type { AppDispatch, RootState } from '../../app/store';
 import ForgotPassword from './ForgotPassword';
+import { validateEmail, validatePassword, authModalStyle } from '../../utils/authUtils';
+import FacebookAuthButton from './FacebookAuthButton';
 
 interface UserLoginProps {
   open: boolean;
@@ -69,15 +71,15 @@ function UserLogin({ open, onClose }: UserLoginProps) {
     const errors: typeof validationErrors = {};
 
     // Email validation
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      errors.email = emailError;
     }
 
     // Password validation
-    if (!formData.password) {
-      errors.password = 'Password is required';
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      errors.password = passwordError;
     }
 
     setValidationErrors(errors);
@@ -108,20 +110,6 @@ function UserLogin({ open, onClose }: UserLoginProps) {
     }
   };
 
-  const modalStyle = {
-    position: 'absolute' as const,
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: { xs: '90%', sm: 500 },
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    borderRadius: 2,
-    p: 4,
-    maxHeight: '90vh',
-    overflow: 'auto',
-  };
-
   return (
     <>
       <Modal
@@ -130,7 +118,7 @@ function UserLogin({ open, onClose }: UserLoginProps) {
         aria-labelledby="login-modal-title"
         aria-describedby="login-modal-description"
       >
-        <Box sx={modalStyle}>
+        <Box sx={authModalStyle}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography id="login-modal-title" variant="h5" component="h2">
               Sign In
@@ -143,6 +131,8 @@ function UserLogin({ open, onClose }: UserLoginProps) {
               <CloseIcon className="primary-blue" />
             </IconButton>
           </Box>
+
+          <FacebookAuthButton label="Login with Facebook" />
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
