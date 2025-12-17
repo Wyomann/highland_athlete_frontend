@@ -24,7 +24,14 @@ function FacebookAuthButton({ label }: FacebookAuthButtonProps) {
         fullWidth
         onClick={handleFacebookOAuth}
         startIcon={<Facebook />}
-        sx={facebookButtonStyle}
+        sx={{
+          ...facebookButtonStyle,
+          '& .MuiButton-startIcon': {
+            '& svg': {
+              fontSize: '24px',
+            },
+          },
+        }}
       >
         {label}
       </Button>
