@@ -4,6 +4,7 @@
  * ⚠️  To update this interface, modify the corresponding DTO in the backend.
  */
 export interface AthleteLiftRankingDto {
+  userId: number
   firstName: string | null
   lastName: string | null
   currentClassTypeId: number | null

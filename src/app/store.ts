@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import authenticationReducer, { registerUser, loginUser, logoutUser, forgotPassword, resetPassword, updateUser } from "../slices/authenticationSlice";
 import sharedReducer from "../slices/sharedSlice";
 import liftRankingsReducer from "../slices/liftRankingsSlice";
+import athletesReducer from "../slices/athletesSlice";
 
 // Create the listener middleware
 const listenerMiddleware = createListenerMiddleware();
@@ -115,6 +116,7 @@ export const store = configureStore({
     authentication: authenticationReducer,
     shared: sharedReducer,
     liftRankings: liftRankingsReducer,
+    athletes: athletesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware),

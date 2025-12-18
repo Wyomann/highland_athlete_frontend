@@ -1,10 +1,11 @@
-import { Box, Container, Grid, Link, Typography } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 function Footer() {
   return (
     <Box component="footer" sx={{ bgcolor: "background.paper", py: 8, borderTop: 1, borderColor: "divider", width: "100%" }}>
-      <Container sx={{ width: "100%" }}>
-        <Grid container spacing={4}>
+      <Box sx={{ width: "100%", px: 3 }}>
+        {/* <Grid container spacing={4}>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="h6" color="text.primary" gutterBottom sx={{ fontWeight: 600 }}>
               Products
@@ -76,7 +77,7 @@ function Footer() {
               Hiring
             </Link>
           </Grid>
-        </Grid>
+        </Grid> */}
         <Box
           sx={{
             mt: 6,
@@ -91,21 +92,21 @@ function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            Copyright © {new Date().getFullYear()} Material UI SAS, trading as MUI.
+            Copyright © {new Date().getFullYear()} Highland Athlete.
           </Typography>
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Link href="#" color="text.secondary" variant="body2">
-              Support
+            <Link component={RouterLink} to="/terms-of-service" color="text.secondary" variant="body2" sx={{ textDecoration: "none", "&:hover": { textDecoration: "underline" } }}>
+              Terms of Service
             </Link>
-            <Link href="#" color="text.secondary" variant="body2">
+            <Link component={RouterLink} to="/privacy-policy" color="text.secondary" variant="body2" sx={{ textDecoration: "none", "&:hover": { textDecoration: "underline" } }}>
               Privacy policy
             </Link>
-            <Link href="#" color="text.secondary" variant="body2">
-              Contact us
+            <Link component={RouterLink} to="/data-deletion" color="text.secondary" variant="body2" sx={{ textDecoration: "none", "&:hover": { textDecoration: "underline" } }}>
+              Data deletion
             </Link>
           </Box>
         </Box>
-      </Container>
+      </Box>
     </Box>
   );
 }

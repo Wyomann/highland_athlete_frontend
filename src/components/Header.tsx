@@ -68,7 +68,8 @@ function Header() {
   };
 
   const navigationLinks = [
-    { label: "Home", href: "#" },
+    { label: "Home", href: "/" },
+    { label: "Athletes", href: "/athletes" },
     { label: "Athletes", href: "#" },
     { label: "Rankings", href: "#" },
     { label: "Records", href: "#" },
@@ -127,7 +128,16 @@ function Header() {
               >
                 Home
               </NavLink>
-              <NavLink href="#" color="text.primary" underline="none">
+              <NavLink
+                href="/athletes"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/athletes');
+                }}
+                color="text.primary"
+                underline="none"
+                sx={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+              >
                 Athletes
               </NavLink>
               <Box
@@ -261,11 +271,7 @@ function Header() {
             <ListItem key={link.label} disablePadding>
               <ListItemButton
                 onClick={() => {
-                  if (link.label === "Home") {
-                    navigate("/");
-                  } else {
-                    // Handle other links as needed
-                  }
+                  navigate(link.href);
                   handleCloseNavMenu();
                 }}
               >

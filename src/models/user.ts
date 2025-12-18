@@ -12,6 +12,7 @@ export interface User {
   currentClassTypeId: number | null
   failedLoginAttempts: number
   accountLockedUntil: string | null
+  facebookId: string | null
   facebookUrl: string | null
   instagramUrl: string | null
   profileImageUrl: string | null

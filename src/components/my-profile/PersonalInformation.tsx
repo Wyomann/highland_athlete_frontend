@@ -354,7 +354,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
           </FormControl>
 
           <TextField
-            label="Facebook URL"
+            label="Facebook Profile"
             name="facebookUrl"
             value={formData.facebookUrl}
             onChange={handleChange}
@@ -384,7 +384,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
           />
 
           <TextField
-            label="Instagram URL"
+            label="Instagram Profile"
             name="instagramUrl"
             value={formData.instagramUrl}
             onChange={handleChange}
@@ -402,11 +402,12 @@ function PersonalInformation({ user }: PersonalInformationProps) {
                       rel="noopener noreferrer"
                       size="small"
                       aria-label="Open Instagram profile"
+                      sx={{ color: "#E4405F" }}
                     >
-                      <Instagram className="primary-blue" />
+                      <Instagram />
                     </IconButton>
                   ) : (
-                    <Instagram className="primary-blue" />
+                    <Instagram sx={{ color: "#E4405F" }} />
                   )}
                 </InputAdornment>
               ),

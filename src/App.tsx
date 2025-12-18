@@ -9,6 +9,11 @@ import Home from './pages/Home'
 import ResetPassword from './pages/ResetPassword'
 import MyProfile from './pages/MyProfile'
 import LiftRankings from './pages/LiftRankings'
+import AthleteProfiles from './pages/AthleteProfiles'
+import AthleteProfile from './pages/AthleteProfile'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfService from './pages/TermsOfService'
+import DataDeletion from './pages/DataDeletion'
 import './App.css'
 
 const theme = createTheme({
@@ -31,6 +36,11 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/my-profile" element={<MyProfile />} />
           <Route path="/rankings/lifts" element={<LiftRankings />} />
+          <Route path="/athletes" element={<AthleteProfiles />} />
+          <Route path="/athletes/:id" element={<AthleteProfile />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/data-deletion" element={<DataDeletion />} />
         </Routes>
         <Footer />
         <ToastContainer

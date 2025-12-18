@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Box, Typography, Paper, FormControl, InputLabel, Select, MenuItem, CircularProgress, IconButton } from "@mui/material";
 import { DataGrid, type GridColDef, type GridRenderCellParams, type GridPaginationModel } from "@mui/x-data-grid";
 import { FitnessCenter, Videocam } from "@mui/icons-material";
@@ -78,7 +78,7 @@ function LiftRankings() {
           dispatch(fetchAthleteLifts(currentFilters));
         }
       }, 0);
-      
+
       return () => clearTimeout(timeoutId);
     }
   }, [dispatch, filters.classTypeId, filters.liftTypeId, filters.prType]);
@@ -139,7 +139,7 @@ function LiftRankings() {
 
   const getUserName = (ranking: AthleteLiftRankingDto): string => {
     if (ranking.lastName && ranking.firstName) {
-      return `${ranking.lastName}, ${ranking.firstName}`;
+      return `${ranking.firstName} ${ranking.lastName}`;
     }
     return ranking.firstName || ranking.lastName || "Unknown";
   };
@@ -149,6 +149,7 @@ function LiftRankings() {
     id: `${ranking.firstName}-${ranking.lastName}-${ranking.liftType.id}-${index}`,
     rank: index + 1,
     athleteName: getUserName(ranking),
+    userId: (ranking as any).userId || null,
     currentClass: getClassTypeName(ranking.currentClassTypeId),
     liftType: ranking.liftType.name,
     weight: ranking.weight,
@@ -158,7 +159,45 @@ function LiftRankings() {
 
   const columns: GridColDef[] = [
     { field: "rank", headerName: "Rank", type: "number", width: 80, align: "center", headerAlign: "center" },
-    { field: "athleteName", headerName: "Athlete Name", flex: 1, minWidth: 150 },
+    {
+      field: "athleteName",
+      headerName: "Athlete Name",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params: GridRenderCellParams) => {
+        const userId = params.row.userId;
+        if (userId) {
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+              <Link
+                to={`/athletes/${userId}`}
+                style={{
+                  textDecoration: "none",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Typography
+                  variant="body2"
+                  className="primary-blue"
+                  sx={{
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  {params.value}
+                </Typography>
+              </Link>
+            </Box>
+          );
+        }
+        return (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Typography variant="body2">{params.value}</Typography>
+          </Box>
+        );
+      },
+    },
     { field: "weight", headerName: "Weight (lbs)", type: "number", flex: 1, minWidth: 120 },
     {
       field: "videoUrl",

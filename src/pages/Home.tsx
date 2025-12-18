@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
-import Testimonials from "../components/Testimonials";
+import RecentlyUpdatedProfiles from "../components/RecentlyUpdatedProfiles";
 import UserRegistration from "../components/authentication/UserRegistration";
 import UserLogin from "../components/authentication/UserLogin";
 import haBackground from "../assets/images/ha_background.png";
@@ -101,7 +101,7 @@ function Home() {
         </Box>
       </Container>
 
-      <Testimonials />
+      <RecentlyUpdatedProfiles />
 
       <UserRegistration open={registrationOpen} onClose={() => setRegistrationOpen(false)} />
       <UserLogin open={loginOpen} onClose={() => setLoginOpen(false)} />
