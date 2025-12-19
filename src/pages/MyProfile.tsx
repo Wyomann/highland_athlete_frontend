@@ -49,6 +49,11 @@ function MyProfile() {
     dispatch(fetchUser());
   };
 
+  // Handle throw added callback - refetch user to get updated data
+  const handleThrowAdded = () => {
+    dispatch(fetchUser());
+  };
+
   // Handle profile image upload
   const handleImageUploadClick = () => {
     fileInputRef.current?.click();
@@ -143,7 +148,7 @@ function MyProfile() {
         {/* Right Column - Athlete Data (2/3) */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack spacing={3}>
-            <AthleteThrows athleteThrows={athleteThrows} />
+            <AthleteThrows athleteThrows={athleteThrows} onThrowAdded={handleThrowAdded} currentClassTypeId={user.currentClassTypeId} />
             <AthleteLifts athleteLifts={athleteLifts} onLiftAdded={handleLiftAdded} />
           </Stack>
         </Box>

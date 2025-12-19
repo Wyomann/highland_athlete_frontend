@@ -7,7 +7,6 @@
 export interface ThrowType {
   id: number
   name: string
-  weight: number
   maxDistance: number
   description: string | null
   classTypeIds: number[] | null
