@@ -14,6 +14,8 @@ export interface AthleteThrow {
   isPr: boolean
   videoUrl: string | null
   score: string | null
+  distance: number;
+  weight?: number | null;
   createdAt: string
   updatedAt: string | null
 }

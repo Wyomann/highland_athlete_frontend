@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import {
   Card,
   CardContent,
@@ -15,11 +15,11 @@ import {
   InputLabel,
   CircularProgress,
   IconButton,
-} from '@mui/material';
-import { Sports, Add, Close as CloseIcon, Videocam, Edit, Delete, Save } from '@mui/icons-material';
-import type { AthleteThrow } from '../../models/athlete-throw';
-import type { RootState } from '../../app/store';
-import DeleteConfirmDialog from '../common/DeleteConfirmDialog';
+} from "@mui/material";
+import { Sports, Add, Close as CloseIcon, Videocam, Edit, Delete, Save } from "@mui/icons-material";
+import type { AthleteThrow } from "../../models/athlete-throw";
+import type { RootState } from "../../app/store";
+import DeleteConfirmDialog from "../common/DeleteConfirmDialog";
 
 interface AthleteThrowsProps {
   athleteThrows: AthleteThrow[];
@@ -35,13 +35,13 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [throwToDelete, setThrowToDelete] = useState<AthleteThrow | null>(null);
   const [formData, setFormData] = useState({
-    throwTypeId: '',
-    classTypeId: '',
-    feet: '',
-    inches: '',
-    weight: '',
-    score: '',
-    videoUrl: '',
+    throwTypeId: "",
+    classTypeId: "",
+    feet: "",
+    inches: "",
+    weight: "", // Added weight to formData
+    score: "",
+    videoUrl: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -58,17 +58,27 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
   };
 
   // Filter throws by PR (only show PRs)
-  const prThrows = athleteThrows.filter(throwItem => throwItem.isPr);
+
+  // Group PR throws by class type
+  const prThrowsByClassType: { [classTypeId: number]: AthleteThrow[] } = {};
+  athleteThrows
+    .filter((throwItem) => throwItem.isPr)
+    .forEach((throwItem) => {
+      if (!prThrowsByClassType[throwItem.classTypeId]) {
+        prThrowsByClassType[throwItem.classTypeId] = [];
+      }
+      prThrowsByClassType[throwItem.classTypeId].push(throwItem);
+    });
 
   // Helper function to get throw type name by ID
   const getThrowTypeName = (throwTypeId: number): string => {
-    const throwType = throwTypes.find(type => type.id === throwTypeId);
+    const throwType = throwTypes.find((type) => type.id === throwTypeId);
     return throwType?.name || `Throw Type ${throwTypeId}`;
   };
 
   // Helper function to get class type name by ID
   const getClassTypeName = (classTypeId: number): string => {
-    const classType = classTypes.find(type => type.id === classTypeId);
+    const classType = classTypes.find((type) => type.id === classTypeId);
     return classType?.name || `Class Type ${classTypeId}`;
   };
 
@@ -81,24 +91,23 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
         classTypeId: String(throwItem.classTypeId),
         feet: String(feet),
         inches: String(inches),
-        weight: throwItem.weight ? String(throwItem.weight) : '',
-        score: throwItem.score || '',
-        videoUrl: throwItem.videoUrl || '',
+        weight: throwItem.weight ? String(throwItem.weight) : "",
+        score: throwItem.score || "",
+        videoUrl: throwItem.videoUrl || "",
       });
     } else {
       setEditingThrow(null);
       // Default to user's current class type if available, otherwise first class type
-      const defaultClassTypeId = currentClassTypeId && classTypes.find(ct => ct.id === currentClassTypeId)
-        ? currentClassTypeId
-        : classTypes.length > 0 ? classTypes[0].id : null;
-      setFormData({ 
-        throwTypeId: '', 
-        classTypeId: defaultClassTypeId ? String(defaultClassTypeId) : '',
-        feet: '', 
-        inches: '',
-        weight: '',
-        score: '',
-        videoUrl: '' 
+      const defaultClassTypeId =
+        currentClassTypeId && classTypes.find((ct) => ct.id === currentClassTypeId) ? currentClassTypeId : classTypes.length > 0 ? classTypes[0].id : null;
+      setFormData({
+        throwTypeId: "",
+        classTypeId: defaultClassTypeId ? String(defaultClassTypeId) : "",
+        feet: "",
+        inches: "",
+        weight: "",
+        score: "",
+        videoUrl: "",
       });
     }
     setModalOpen(true);
@@ -107,7 +116,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
   const handleCloseModal = () => {
     setModalOpen(false);
     setEditingThrow(null);
-    setFormData({ throwTypeId: '', classTypeId: '', feet: '', inches: '', weight: '', score: '', videoUrl: '' });
+    setFormData({ throwTypeId: "", classTypeId: "", feet: "", inches: "", weight: "", score: "", videoUrl: "" });
   };
 
   const handleEdit = (throwItem: AthleteThrow) => {
@@ -125,33 +134,33 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
     setDeleteConfirmOpen(false);
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
       const throwId = throwToDelete.id;
       if (!throwId) {
-        toast.error('Unable to delete: Throw ID not found');
+        toast.error("Unable to delete: Throw ID not found");
         setThrowToDelete(null);
         return;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}/api/athlete-throws/${throwId}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       });
 
       if (!response.ok) {
         const data = await response.json();
-        toast.error(data.message || 'Failed to delete throw');
+        toast.error(data.message || "Failed to delete throw");
         setThrowToDelete(null);
         return;
       }
 
-      toast.success('Throw deleted successfully!');
+      toast.success("Throw deleted successfully!");
       setThrowToDelete(null);
       if (onThrowAdded) {
         onThrowAdded();
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete throw');
+      toast.error(err instanceof Error ? err.message : "Failed to delete throw");
       setThrowToDelete(null);
     }
   };
@@ -175,31 +184,31 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
     e.preventDefault();
 
     if (!formData.throwTypeId) {
-      toast.error('Please select a throw type');
+      toast.error("Please select a throw type");
       return;
     }
 
     if (!formData.classTypeId) {
-      toast.error('Please select a class type');
+      toast.error("Please select a class type");
       return;
     }
 
     // Validate feet and inches
     const feet = Number(formData.feet);
     const inches = Number(formData.inches);
-    
+
     if (isNaN(feet) || feet < 0 || !Number.isInteger(feet)) {
-      toast.error('Please enter a valid number of feet (whole number)');
+      toast.error("Please enter a valid number of feet (whole number)");
       return;
     }
 
     if (isNaN(inches) || inches < 0 || inches >= 12 || !Number.isInteger(inches)) {
-      toast.error('Please enter a valid number of inches (0-11)');
+      toast.error("Please enter a valid number of inches (0-11)");
       return;
     }
 
     if (feet === 0 && inches === 0) {
-      toast.error('Please enter a distance greater than 0');
+      toast.error("Please enter a distance greater than 0");
       return;
     }
 
@@ -208,19 +217,16 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
 
     const selectedThrowTypeId = Number(formData.throwTypeId);
     const selectedClassTypeId = Number(formData.classTypeId);
-    const selectedThrowType = throwTypes.find(type => type.id === selectedThrowTypeId);
+    const selectedThrowType = throwTypes.find((type) => type.id === selectedThrowTypeId);
 
     // Check for duplicate PRs with the same throw type and class type (skip if editing the same throw)
     if (!editingThrow) {
       const existingPR = athleteThrows.find(
-        throwItem => 
-          throwItem.throwTypeId === selectedThrowTypeId && 
-          throwItem.classTypeId === selectedClassTypeId && 
-          throwItem.isPr
+        (throwItem) => throwItem.throwTypeId === selectedThrowTypeId && throwItem.classTypeId === selectedClassTypeId && throwItem.isPr
       );
       if (existingPR) {
         const classTypeName = getClassTypeName(selectedClassTypeId);
-        toast.error(`You already have a PR for ${selectedThrowType?.name || 'this throw type'} in ${classTypeName}`);
+        toast.error(`You already have a PR for ${selectedThrowType?.name || "this throw type"} in ${classTypeName}`);
         return;
       }
     }
@@ -236,13 +242,13 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
     setLoading(true);
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
       const response = await fetch(`${API_BASE_URL}/api/athlete-throws`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           throwTypeId: Number(formData.throwTypeId),
           classTypeId: Number(formData.classTypeId),
@@ -257,102 +263,122 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || 'Failed to add throw');
+        toast.error(data.message || "Failed to add throw");
         setLoading(false);
         return;
       }
 
       // Success - close modal and refresh
-      toast.success(`${editingThrow ? 'Throw updated' : 'PR throw added'} successfully!`);
+      toast.success(`${editingThrow ? "Throw updated" : "PR throw added"} successfully!`);
       handleCloseModal();
       if (onThrowAdded) {
         onThrowAdded();
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to add throw');
+      toast.error(err instanceof Error ? err.message : "Failed to add throw");
     } finally {
       setLoading(false);
     }
   };
 
   const modalStyle = {
-    position: 'absolute' as const,
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: { xs: '90%', sm: 500 },
-    bgcolor: 'background.paper',
+    position: "absolute" as const,
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: { xs: "90%", sm: 500 },
+    bgcolor: "background.paper",
     boxShadow: 24,
     borderRadius: 2,
     p: 4,
-    maxHeight: '90vh',
-    overflow: 'auto',
+    maxHeight: "90vh",
+    overflow: "auto",
   };
 
   return (
     <Card>
       <CardContent>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+        <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
           <Sports className="primary-blue" /> Athlete PR Throws
         </Typography>
 
-        {/* PRs by Class */}
+        {/* PRs grouped by Class Type */}
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 2 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<Add />}
-              onClick={() => handleOpenModal()}
-            >
+          <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", mb: 2 }}>
+            <Button variant="outlined" size="small" startIcon={<Add />} onClick={() => handleOpenModal()}>
               Add New
             </Button>
           </Box>
-          {prThrows.length === 0 ? (
+          {Object.keys(prThrowsByClassType).length === 0 ? (
             <Typography variant="body2" color="text.secondary">
               No PRs recorded yet.
             </Typography>
           ) : (
             <Box>
-              {prThrows.map((athleteThrow, throwIndex) => (
-                <Box key={throwIndex} sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, position: 'relative' }}>
-                  <Box sx={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 0.5 }}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEdit(athleteThrow)}
-                      aria-label="Edit throw"
-                    >
-                      <Edit fontSize="small" className="primary-blue" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteClick(athleteThrow)}
-                      aria-label="Delete throw"
-                    >
-                      <Delete color="error" fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    {getThrowTypeName(athleteThrow.throwTypeId)}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body1">
-                      Distance: <Box component="span" sx={{ fontWeight: 600 }}>{athleteThrow.distance.toFixed(2)}</Box>
-                    </Typography>
-                    {athleteThrow.videoUrl && (
-                      <IconButton
-                        component="a"
-                        href={athleteThrow.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Watch video"
-                      >
-                        <Videocam className="primary-blue" />
-                      </IconButton>
-                    )}
-                  </Box>
-                </Box>
-              ))}
+              {Object.entries(prThrowsByClassType)
+                .sort(([aId], [bId]) => {
+                  const aName = getClassTypeName(Number(aId)).toLowerCase();
+                  const bName = getClassTypeName(Number(bId)).toLowerCase();
+                  return aName.localeCompare(bName);
+                })
+                .map(([classTypeId, throws]) => {
+                  const sortedThrows = [...throws].sort((a, b) => {
+                    const aName = getThrowTypeName(a.throwTypeId).toLowerCase();
+                    const bName = getThrowTypeName(b.throwTypeId).toLowerCase();
+                    return aName.localeCompare(bName);
+                  });
+                  return (
+                    <Box key={classTypeId} sx={{ mb: 3 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                        {getClassTypeName(Number(classTypeId))}
+                      </Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                        {sortedThrows.map((athleteThrow) => (
+                          <Box
+                            key={athleteThrow.id}
+                            sx={{
+                              mb: 2,
+                              p: 2,
+                              border: "1px solid",
+                              borderColor: "divider",
+                              borderRadius: 1,
+                              position: "relative",
+                              width: 300,
+                              minWidth: 0,
+                              boxSizing: "border-box",
+                              flex: "0 1 300px",
+                            }}
+                          >
+                            <Box sx={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 0.5 }}>
+                              <IconButton size="small" onClick={() => handleEdit(athleteThrow)} aria-label="Edit throw">
+                                <Edit fontSize="small" className="primary-blue" />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => handleDeleteClick(athleteThrow)} aria-label="Delete throw">
+                                <Delete color="error" fontSize="small" />
+                              </IconButton>
+                            </Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                              {getThrowTypeName(athleteThrow.throwTypeId)}
+                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Typography variant="body1">
+                                Distance:{" "}
+                                <Box component="span" sx={{ fontWeight: 600 }}>
+                                  {athleteThrow.distance.toFixed(2)}
+                                </Box>
+                              </Typography>
+                              {athleteThrow.videoUrl && (
+                                <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
+                                  <Videocam className="primary-blue" />
+                                </IconButton>
+                              )}
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  );
+                })}
             </Box>
           )}
         </Box>
@@ -361,25 +387,19 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
       {/* Add Throw Modal */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
         <Box sx={modalStyle}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
             <Typography variant="h6" component="h2">
-              {editingThrow ? 'Edit' : 'Add'} PR Throw
+              {editingThrow ? "Edit" : "Add"} PR Throw
             </Typography>
             <IconButton onClick={handleCloseModal} aria-label="close">
               <CloseIcon className="primary-blue" />
             </IconButton>
           </Box>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <FormControl fullWidth required>
               <InputLabel>Class Type</InputLabel>
-              <Select
-                name="classTypeId"
-                value={formData.classTypeId}
-                onChange={handleSelectChange}
-                label="Class Type"
-                disabled={!!editingThrow}
-              >
+              <Select name="classTypeId" value={formData.classTypeId} onChange={handleSelectChange} label="Class Type" disabled={!!editingThrow}>
                 {classTypes.map((classType) => (
                   <MenuItem key={classType.id} value={String(classType.id)}>
                     {classType.name}
@@ -390,12 +410,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
 
             <FormControl fullWidth required>
               <InputLabel>Throw Type</InputLabel>
-              <Select
-                name="throwTypeId"
-                value={formData.throwTypeId}
-                onChange={handleSelectChange}
-                label="Throw Type"
-              >
+              <Select name="throwTypeId" value={formData.throwTypeId} onChange={handleSelectChange} label="Throw Type">
                 {throwTypes.map((throwType) => (
                   <MenuItem key={throwType.id} value={String(throwType.id)}>
                     {throwType.name}
@@ -404,7 +419,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
               </Select>
             </FormControl>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
                 label="Feet"
                 name="feet"
@@ -412,9 +427,9 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                 value={formData.feet}
                 onChange={handleChange}
                 required
-                inputProps={{ 
+                inputProps={{
                   min: 0,
-                  step: 1
+                  step: 1,
                 }}
                 sx={{ flex: 1 }}
               />
@@ -425,10 +440,10 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                 value={formData.inches}
                 onChange={handleChange}
                 required
-                inputProps={{ 
+                inputProps={{
                   min: 0,
                   max: 11,
-                  step: 1
+                  step: 1,
                 }}
                 error={
                   formData.throwTypeId && formData.feet && formData.inches
@@ -436,7 +451,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                         const feet = Number(formData.feet);
                         const inches = Number(formData.inches);
                         const distance = convertToDistance(feet, inches);
-                        const maxDistance = throwTypes.find(t => t.id === Number(formData.throwTypeId))?.maxDistance || 0;
+                        const maxDistance = throwTypes.find((t) => t.id === Number(formData.throwTypeId))?.maxDistance || 0;
                         return distance > maxDistance;
                       })()
                     : false
@@ -446,37 +461,31 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
             </Box>
 
             {/* Weight and Score fields for Caber */}
-            {formData.throwTypeId && (() => {
-              const selectedThrowType = throwTypes.find(t => t.id === Number(formData.throwTypeId));
-              const isCaber = selectedThrowType?.name.toLowerCase() === 'caber';
-              if (isCaber) {
-                return (
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="Weight"
-                      name="weight"
-                      type="number"
-                      value={formData.weight}
-                      onChange={handleChange}
-                      inputProps={{ 
-                        min: 0,
-                        step: 0.01
-                      }}
-                      sx={{ flex: 1 }}
-                    />
-                    <TextField
-                      label="Score"
-                      name="score"
-                      type="text"
-                      value={formData.score}
-                      onChange={handleChange}
-                      sx={{ flex: 1 }}
-                    />
-                  </Box>
-                );
-              }
-              return null;
-            })()}
+            {formData.throwTypeId &&
+              (() => {
+                const selectedThrowType = throwTypes.find((t) => t.id === Number(formData.throwTypeId));
+                const isCaber = selectedThrowType?.name.toLowerCase() === "caber";
+                if (isCaber) {
+                  return (
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                      <TextField
+                        label="Weight"
+                        name="weight"
+                        type="number"
+                        value={formData.weight}
+                        onChange={handleChange}
+                        inputProps={{
+                          min: 0,
+                          step: 0.01,
+                        }}
+                        sx={{ flex: 1 }}
+                      />
+                      <TextField label="Score" name="score" type="text" value={formData.score} onChange={handleChange} sx={{ flex: 1 }} />
+                    </Box>
+                  );
+                }
+                return null;
+              })()}
 
             <TextField
               label="Video URL (optional)"
@@ -489,13 +498,8 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
               helperText="Link to a video of this throw"
             />
 
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={handleCloseModal}
-                fullWidth
-                disabled={loading}
-              >
+            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+              <Button variant="outlined" onClick={handleCloseModal} fullWidth disabled={loading}>
                 Cancel
               </Button>
               <Button
@@ -503,9 +507,9 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                 variant="contained"
                 fullWidth
                 disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : (editingThrow ? <Save /> : <Add />)}
+                startIcon={loading ? <CircularProgress size={20} /> : editingThrow ? <Save /> : <Add />}
               >
-                {loading ? (editingThrow ? 'Updating...' : 'Adding...') : (editingThrow ? 'Update Throw' : 'Add Throw')}
+                {loading ? (editingThrow ? "Updating..." : "Adding...") : editingThrow ? "Update Throw" : "Add Throw"}
               </Button>
             </Box>
           </Box>
@@ -525,4 +529,3 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
 }
 
 export default AthleteThrows;
-
