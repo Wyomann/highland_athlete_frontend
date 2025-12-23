@@ -10,12 +10,12 @@ export interface AthleteThrow {
   throwTypeId: number
   classTypeId: number
   gameId: number | null
+  distance: number
   place: number
   isPr: boolean
   videoUrl: string | null
+  weight: number | null
   score: string | null
-  distance: number;
-  weight?: number | null;
   createdAt: string
   updatedAt: string | null
 }

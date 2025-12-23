@@ -8,7 +8,7 @@ import type { AppDispatch, RootState } from "../app/store";
 import type { AthleteThrow } from "../models/athlete-throw";
 import type { AthleteLift } from "../models/athlete-lift";
 import AthletePersonalInformation from "../components/athlete-profiles/AthletePersonalInformation";
-import AthleteThrows from "../components/my-profile/AthleteThrows";
+import AthleteThrowsView from "../components/athlete-profiles/AthleteThrowsView";
 import AthleteLiftsView from "../components/athlete-profiles/AthleteLiftsView";
 
 function AthleteProfile() {
@@ -101,7 +101,7 @@ function AthleteProfile() {
         {/* Right Column - Athlete Data (2/3) */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack spacing={3}>
-            <AthleteThrows athleteThrows={athleteThrows} />
+            <AthleteThrowsView athleteThrows={athleteThrows} />
             <AthleteLiftsView athleteLifts={athleteLifts} />
           </Stack>
         </Box>

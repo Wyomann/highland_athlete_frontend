@@ -20,7 +20,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { AccountCircle, Menu as MenuIcon, Close as CloseIcon, ArrowDropDown } from "@mui/icons-material";
+import { AccountCircle, Menu as MenuIcon, Close as CloseIcon, ArrowDropDown, ArrowRight } from "@mui/icons-material";
 import SideMenu from "./SideMenu";
 import type { RootState } from "../app/store";
 import haAthleteImage from "../assets/images/ha_athlete.png";
@@ -38,6 +38,7 @@ function Header() {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const [rankingsAnchorEl, setRankingsAnchorEl] = useState<null | HTMLElement>(null);
+  const [throwRankingsAnchorEl, setThrowRankingsAnchorEl] = useState<null | HTMLElement>(null);
   const user = useSelector((state: RootState) => state.authentication.user);
 
   const handleOpenSideMenu = () => {
@@ -57,6 +58,8 @@ function Header() {
   };
 
   const rankingsMenuOpen = Boolean(rankingsAnchorEl);
+  const throwRankingsMenuOpen = Boolean(throwRankingsAnchorEl);
+  
   const handleRankingsMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
     // Only set anchor if not already set (prevents menu from moving when hovering over it)
     if (!rankingsAnchorEl) {
@@ -65,6 +68,16 @@ function Header() {
   };
   const handleRankingsMouseLeave = () => {
     setRankingsAnchorEl(null);
+    setThrowRankingsAnchorEl(null);
+  };
+
+  const handleThrowRankingsMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    setThrowRankingsAnchorEl(event.currentTarget);
+  };
+
+  const handleThrowRankingsMouseLeave = () => {
+    setThrowRankingsAnchorEl(null);
   };
 
   const navigationLinks = [
@@ -206,8 +219,62 @@ function Header() {
                   transformOrigin={{ horizontal: "right", vertical: "top" }}
                   anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
-                  <MenuItem>
-                    <ListItemText primary="Highland Athlete Throw Rankings" />
+                  <MenuItem
+                    onMouseEnter={handleThrowRankingsMouseEnter}
+                    onMouseLeave={handleThrowRankingsMouseLeave}
+                  >
+                    <ListItemText primary="Highland Athlete Throw Rankings by Personal Record" />
+                    <ArrowRight sx={{ ml: 1 }} />
+                    <Menu
+                      anchorEl={throwRankingsAnchorEl}
+                      open={throwRankingsMenuOpen}
+                      onClose={handleThrowRankingsMouseLeave}
+                      anchorOrigin={{ horizontal: "left", vertical: "top" }}
+                      transformOrigin={{ horizontal: "right", vertical: "top" }}
+                      MenuListProps={{
+                        onMouseLeave: handleThrowRankingsMouseLeave,
+                      }}
+                      slotProps={{
+                        paper: {
+                          elevation: 0,
+                          onMouseLeave: handleThrowRankingsMouseLeave,
+                          sx: {
+                            overflow: "visible",
+                            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                            ml: 0.5,
+                            "&::before": {
+                              content: '""',
+                              display: "block",
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: 10,
+                              height: 10,
+                              bgcolor: "background.paper",
+                              transform: "translateX(-50%) translateY(50%) rotate(45deg)",
+                              zIndex: 0,
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          // TODO: Navigate to Rankings By Year/Season page when created
+                          handleRankingsMouseLeave();
+                        }}
+                      >
+                        <ListItemText primary="Rankings By Year/Season" />
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          navigate("/rankings/throws");
+                          handleRankingsMouseLeave();
+                        }}
+                      >
+                        <ListItemText primary="Rankings By PRs" />
+                      </MenuItem>
+                    </Menu>
                   </MenuItem>
                   <MenuItem>
                     <ListItemText primary="IHGF Throw Rankings" />

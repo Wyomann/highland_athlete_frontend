@@ -364,7 +364,10 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                               <Typography variant="body1">
                                 Distance:{" "}
                                 <Box component="span" sx={{ fontWeight: 600 }}>
-                                  {athleteThrow.distance.toFixed(2)}
+                                  {(() => {
+                                    const { feet, inches } = convertFromDistance(athleteThrow.distance);
+                                    return `${feet}' ${inches}"`;
+                                  })()}
                                 </Box>
                               </Typography>
                               {athleteThrow.videoUrl && (

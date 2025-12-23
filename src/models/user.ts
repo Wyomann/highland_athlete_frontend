@@ -9,7 +9,9 @@ export interface User {
   firstName: string | null
   lastName: string | null
   email: string
+  roleId: number | null
   currentClassTypeId: number | null
+  passwordResetTokenExpiresAt: string | null
   failedLoginAttempts: number
   accountLockedUntil: string | null
   facebookId: string | null

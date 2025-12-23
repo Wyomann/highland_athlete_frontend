@@ -9,6 +9,7 @@ import Home from './pages/Home'
 import ResetPassword from './pages/ResetPassword'
 import MyProfile from './pages/MyProfile'
 import LiftRankings from './pages/LiftRankings'
+import ThrowRankings from './pages/ThrowRankings'
 import AthleteProfiles from './pages/AthleteProfiles'
 import AthleteProfile from './pages/AthleteProfile'
 import PrivacyPolicy from './pages/PrivacyPolicy'
@@ -36,6 +37,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/my-profile" element={<MyProfile />} />
           <Route path="/rankings/lifts" element={<LiftRankings />} />
+          <Route path="/rankings/throws" element={<ThrowRankings />} />
           <Route path="/athletes" element={<AthleteProfiles />} />
           <Route path="/athletes/:id" element={<AthleteProfile />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
