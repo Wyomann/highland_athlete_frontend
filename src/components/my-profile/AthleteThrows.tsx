@@ -202,8 +202,8 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
       return;
     }
 
-    if (isNaN(inches) || inches < 0 || inches >= 12 || !Number.isInteger(inches)) {
-      toast.error("Please enter a valid number of inches (0-11)");
+    if (isNaN(inches) || inches < 0 || inches > 11.5) {
+      toast.error("Please enter a valid number of inches (0-11.5)");
       return;
     }
 
@@ -360,22 +360,61 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
                               {getThrowTypeName(athleteThrow.throwTypeId)}
                             </Typography>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                              <Typography variant="body1">
-                                Distance:{" "}
-                                <Box component="span" sx={{ fontWeight: 600 }}>
-                                  {(() => {
-                                    const { feet, inches } = convertFromDistance(athleteThrow.distance);
-                                    return `${feet}' ${inches}"`;
-                                  })()}
+                            {(() => {
+                              const throwTypeName = getThrowTypeName(athleteThrow.throwTypeId);
+                              const isCaber = throwTypeName.toLowerCase() === "caber";
+                              const { feet, inches } = convertFromDistance(athleteThrow.distance);
+                              
+                              if (isCaber) {
+                                return (
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+                                    <Typography variant="body1">
+                                      Length:{" "}
+                                      <Box component="span" sx={{ fontWeight: 600 }}>
+                                        {feet}' {inches}"
+                                      </Box>
+                                      {athleteThrow.weight && (
+                                        <>
+                                          {" "}
+                                          <Box component="span" sx={{ fontWeight: 600 }}>
+                                            {athleteThrow.weight} lbs
+                                          </Box>
+                                        </>
+                                      )}
+                                    </Typography>
+                                    {athleteThrow.score && (
+                                      <Typography variant="body1">
+                                        Score:{" "}
+                                        <Box component="span" sx={{ fontWeight: 600 }}>
+                                          {athleteThrow.score}
+                                        </Box>
+                                      </Typography>
+                                    )}
+                                    {athleteThrow.videoUrl && (
+                                      <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
+                                        <Videocam className="primary-blue" />
+                                      </IconButton>
+                                    )}
+                                  </Box>
+                                );
+                              }
+                              
+                              return (
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                  <Typography variant="body1">
+                                    Distance:{" "}
+                                    <Box component="span" sx={{ fontWeight: 600 }}>
+                                      {feet}' {inches}"
+                                    </Box>
+                                  </Typography>
+                                  {athleteThrow.videoUrl && (
+                                    <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
+                                      <Videocam className="primary-blue" />
+                                    </IconButton>
+                                  )}
                                 </Box>
-                              </Typography>
-                              {athleteThrow.videoUrl && (
-                                <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
-                                  <Videocam className="primary-blue" />
-                                </IconButton>
-                              )}
-                            </Box>
+                              );
+                            })()}
                           </Box>
                         ))}
                       </Box>
@@ -445,8 +484,8 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                 required
                 inputProps={{
                   min: 0,
-                  max: 11,
-                  step: 1,
+                  max: 11.5,
+                  step: 0.5,
                 }}
                 error={
                   formData.throwTypeId && formData.feet && formData.inches

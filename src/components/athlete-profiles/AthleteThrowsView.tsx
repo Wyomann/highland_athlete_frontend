@@ -99,29 +99,60 @@ function AthleteThrowsView({ athleteThrows }: AthleteThrowsViewProps) {
                               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
                                 {getThrowTypeName(athleteThrow.throwTypeId)}
                               </Typography>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                <Typography variant="body1">
-                                  Distance:{" "}
-                                  <Box component="span" sx={{ fontWeight: 600 }}>
-                                    {feet}' {inches}"
+                              {(() => {
+                                const throwTypeName = getThrowTypeName(athleteThrow.throwTypeId);
+                                const isCaber = throwTypeName.toLowerCase() === "caber";
+                                
+                                if (isCaber) {
+                                  return (
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+                                      <Typography variant="body1">
+                                        Length:{" "}
+                                        <Box component="span" sx={{ fontWeight: 600 }}>
+                                          {feet}' {inches}"
+                                        </Box>
+                                        {athleteThrow.weight && (
+                                          <>
+                                            {" "}
+                                            <Box component="span" sx={{ fontWeight: 600 }}>
+                                              {athleteThrow.weight} lbs
+                                            </Box>
+                                          </>
+                                        )}
+                                      </Typography>
+                                      {athleteThrow.score && (
+                                        <Typography variant="body1">
+                                          Score:{" "}
+                                          <Box component="span" sx={{ fontWeight: 600 }}>
+                                            {athleteThrow.score}
+                                          </Box>
+                                        </Typography>
+                                      )}
+                                      {athleteThrow.videoUrl && (
+                                        <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
+                                          <Videocam className="primary-blue" />
+                                        </IconButton>
+                                      )}
+                                    </Box>
+                                  );
+                                }
+                                
+                                return (
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                    <Typography variant="body1">
+                                      Distance:{" "}
+                                      <Box component="span" sx={{ fontWeight: 600 }}>
+                                        {feet}' {inches}"
+                                      </Box>
+                                    </Typography>
+                                    {athleteThrow.videoUrl && (
+                                      <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
+                                        <Videocam className="primary-blue" />
+                                      </IconButton>
+                                    )}
                                   </Box>
-                                </Typography>
-                                {athleteThrow.videoUrl && (
-                                  <IconButton component="a" href={athleteThrow.videoUrl} target="_blank" rel="noopener noreferrer" aria-label="Watch video">
-                                    <Videocam className="primary-blue" />
-                                  </IconButton>
-                                )}
-                              </Box>
-                              {athleteThrow.weight && (
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  Weight: {athleteThrow.weight} lbs
-                                </Typography>
-                              )}
-                              {athleteThrow.score && (
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  Score: {athleteThrow.score}
-                                </Typography>
-                              )}
+                                );
+                              })()}
                             </Box>
                           );
                         })}

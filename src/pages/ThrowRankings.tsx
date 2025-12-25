@@ -7,13 +7,15 @@ import { SportsBaseball, Videocam } from "@mui/icons-material";
 import type { RootState, AppDispatch } from "../app/store";
 import { fetchAthleteThrows, setClassTypeFilter, setThrowTypeFilter } from "../slices/throwRankingsSlice";
 import type { AthleteThrowRankingDto } from "../models/athlete-throw-ranking-dto";
+import type { AthleteThrowOverallRankingDto } from "../models/athlete-throw-overall-ranking-dto";
 
 function ThrowRankings() {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
   const classTypes = useSelector((state: RootState) => state.shared.classTypes);
   const throwTypes = useSelector((state: RootState) => state.shared.throwTypes);
-  const { athleteThrowRankings, loading, filters } = useSelector((state: RootState) => state.throwRankings);
+  const { athleteThrowRankings, athleteThrowOverallRankings, loading, filters } = useSelector((state: RootState) => state.throwRankings);
+  const isOverallSelected = filters.throwTypeId === null;
   const initializedRef = useRef(false);
   const hasInitialFetchRef = useRef(false);
   const prevFiltersRef = useRef<{ classTypeId: number | null; throwTypeId: number | null } | null>(null);
@@ -38,16 +40,16 @@ function ThrowRankings() {
         dispatch(setClassTypeFilter(null));
       }
 
-      // Set throw type filter from URL param or default to first option
+      // Set throw type filter from URL param or default to null (Overall)
       if (throwTypeIdParam) {
         const throwTypeId = Number(throwTypeIdParam);
         if (!isNaN(throwTypeId) && throwTypes.some((tt) => tt.id === throwTypeId)) {
           dispatch(setThrowTypeFilter(throwTypeId));
         } else {
-          dispatch(setThrowTypeFilter(throwTypes[0].id));
+          dispatch(setThrowTypeFilter(null));
         }
       } else {
-        dispatch(setThrowTypeFilter(throwTypes[0].id));
+        dispatch(setThrowTypeFilter(null));
       }
 
       initializedRef.current = true;
@@ -56,7 +58,7 @@ function ThrowRankings() {
 
   // Initial fetch after filters are initialized (only once)
   useEffect(() => {
-    if (initializedRef.current && !hasInitialFetchRef.current && filters.throwTypeId !== null) {
+    if (initializedRef.current && !hasInitialFetchRef.current) {
       // Use a small timeout to ensure all filter dispatches have completed
       const timeoutId = setTimeout(() => {
         if (!hasInitialFetchRef.current) {
@@ -94,8 +96,8 @@ function ThrowRankings() {
 
   // Fetch data when filters change (after initial fetch)
   useEffect(() => {
-    // Only fetch if we've done the initial fetch and filters have actually changed
-    if (hasInitialFetchRef.current && filters.throwTypeId !== null) {
+    // Only fetch if we've done the initial fetch
+    if (hasInitialFetchRef.current) {
       const currentFilters = {
         classTypeId: filters.classTypeId === 0 || filters.classTypeId === null ? null : filters.classTypeId,
         throwTypeId: filters.throwTypeId,
@@ -114,16 +116,27 @@ function ThrowRankings() {
   }, [dispatch, filters.classTypeId, filters.throwTypeId]);
 
   // Filter by throw's class (classType.id) if a class filter is selected
-  const displayRankings = Array.isArray(athleteThrowRankings)
-    ? athleteThrowRankings.filter((ranking) => {
-        // If no class filter is selected (null or 0), show all throws
-        if (!filters.classTypeId || filters.classTypeId === 0) {
-          return true;
-        }
-        // Filter by the throw's class (classType.id), not the athlete's current class
-        return ranking.classType?.id === filters.classTypeId;
-      })
-    : [];
+  const displayRankings = isOverallSelected
+    ? (Array.isArray(athleteThrowOverallRankings)
+        ? athleteThrowOverallRankings.filter((ranking) => {
+            // If no class filter is selected (null or 0), show all throws
+            if (!filters.classTypeId || filters.classTypeId === 0) {
+              return true;
+            }
+            // Filter by the throw's class (classType.id)
+            return ranking.classType?.id === filters.classTypeId;
+          })
+        : [])
+    : (Array.isArray(athleteThrowRankings)
+        ? athleteThrowRankings.filter((ranking) => {
+            // If no class filter is selected (null or 0), show all throws
+            if (!filters.classTypeId || filters.classTypeId === 0) {
+              return true;
+            }
+            // Filter by the throw's class (classType.id), not the athlete's current class
+            return ranking.classType?.id === filters.classTypeId;
+          })
+        : []);
 
   const getClassTypeName = (classTypeId: number | null): string => {
     if (!classTypeId) return "N/A";
@@ -131,11 +144,11 @@ function ThrowRankings() {
     return classType?.name || `Class ${classTypeId}`;
   };
 
-  const getUserName = (ranking: AthleteThrowRankingDto): string => {
-    if (ranking.lastName && ranking.firstName) {
-      return `${ranking.firstName} ${ranking.lastName}`;
+  const getUserName = (firstName: string | null, lastName: string | null): string => {
+    if (lastName && firstName) {
+      return `${firstName} ${lastName}`;
     }
-    return ranking.firstName || ranking.lastName || "Unknown";
+    return firstName || lastName || "Unknown";
   };
 
   // Helper function to convert decimal distance (in feet) to feet and inches
@@ -146,86 +159,224 @@ function ThrowRankings() {
   };
 
   // Prepare data for DataGrid with unique IDs
-  const rows = displayRankings.map((ranking, index) => {
-    const { feet, inches } = convertFromDistance(ranking.distance);
-    return {
-      id: `${ranking.firstName}-${ranking.lastName}-${ranking.throwType.id}-${index}`,
-      rank: index + 1,
-      athleteName: getUserName(ranking),
-      userId: ranking.userId || null,
-      throwClass: ranking.classType?.name || "N/A",
-      throwType: ranking.throwType.name,
-      distance: ranking.distance,
-      distanceDisplay: `${feet}' ${inches}"`,
-      videoUrl: ranking.videoUrl,
-    };
-  });
+  const rows = isOverallSelected
+    ? (displayRankings as AthleteThrowOverallRankingDto[]).map((ranking, index) => {
+        // Create an object with throw data for each throwType
+        const throwData: { [throwTypeId: number]: { distance: string; points: number | null } } = {};
+        ranking.throws.forEach((throwItem) => {
+          const { feet, inches } = convertFromDistance(throwItem.distance);
+          throwData[throwItem.throwType.id] = {
+            distance: `${feet}' ${inches}"`,
+            points: throwItem.points,
+          };
+        });
 
-  const columns: GridColDef[] = [
-    { field: "rank", headerName: "Rank", type: "number", width: 80, align: "center", headerAlign: "center" },
-    {
-      field: "athleteName",
-      headerName: "Athlete Name",
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params: GridRenderCellParams) => {
-        const userId = params.row.userId;
-        if (userId) {
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-              <Link
-                to={`/athletes/${userId}`}
-                style={{
-                  textDecoration: "none",
+        // Create row data with throw data for each throwType
+        const rowData: any = {
+          id: `${ranking.firstName}-${ranking.lastName}-overall-${index}`,
+          rank: index + 1,
+          athleteName: getUserName(ranking.firstName, ranking.lastName),
+          userId: ranking.userId || null,
+          totalPoints: ranking.totalPoints,
+          throwClass: ranking.classType?.name || "N/A",
+          usedThrowTypeIds: ranking.usedThrowTypeIds || [],
+        };
+
+        // Add throw data for each throwType
+        throwTypes.forEach((throwType) => {
+          rowData[`throw_${throwType.id}`] = throwData[throwType.id] || null;
+        });
+
+        return rowData;
+      })
+    : (displayRankings as AthleteThrowRankingDto[]).map((ranking, index) => {
+        const { feet, inches } = convertFromDistance(ranking.distance);
+        return {
+          id: `${ranking.firstName}-${ranking.lastName}-${ranking.throwType.id}-${index}`,
+          rank: index + 1,
+          athleteName: getUserName(ranking.firstName, ranking.lastName),
+          userId: ranking.userId || null,
+          throwClass: ranking.classType?.name || "N/A",
+          throwType: ranking.throwType.name,
+          distance: ranking.distance,
+          distanceDisplay: `${feet}' ${inches}"`,
+          videoUrl: ranking.videoUrl,
+        };
+      });
+
+  const columns: GridColDef[] = isOverallSelected
+    ? [
+        { field: "rank", headerName: "Rank", type: "number", width: 80, align: "center", headerAlign: "center" },
+        { field: "totalPoints", headerName: "Total Points", type: "number", flex: 1, minWidth: 120 },
+        {
+          field: "athleteName",
+          headerName: "Athlete Name",
+          flex: 1,
+          minWidth: 150,
+          renderCell: (params: GridRenderCellParams) => {
+            const userId = params.row.userId;
+            if (userId) {
+              return (
+                <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                  <Link
+                    to={`/athletes/${userId}`}
+                    style={{
+                      textDecoration: "none",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Typography
+                      variant="body2"
+                      className="primary-blue"
+                      sx={{
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      {params.value}
+                    </Typography>
+                  </Link>
+                </Box>
+              );
+            }
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                <Typography variant="body2">{params.value}</Typography>
+              </Box>
+            );
+          },
+        },
+        // Dynamic columns for each throwType
+        ...throwTypes.map((throwType) => ({
+          field: `throw_${throwType.id}`,
+          headerName: throwType.name,
+          flex: 1,
+          minWidth: 120,
+          align: "center" as const,
+          headerAlign: "center" as const,
+          renderCell: (params: GridRenderCellParams) => {
+            const throwData = params.value as { distance: string; points: number | null } | null;
+            const usedThrowTypeIds = (params.row.usedThrowTypeIds as number[]) || [];
+            const isDisabled = !usedThrowTypeIds.includes(throwType.id);
+
+            if (!throwData) {
+              return (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    py: 1,
+                    opacity: isDisabled ? 0.6 : 1,
+                    color: isDisabled ? "text.disabled" : "text.secondary",
+                  }}
+                >
+                  <Typography variant="body2" color={isDisabled ? "text.disabled" : "text.secondary"}>
+                    -
+                  </Typography>
+                </Box>
+              );
+            }
+            return (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  py: 1,
+                  opacity: isDisabled ? 0.6 : 1,
                 }}
-                onClick={(e) => e.stopPropagation()}
               >
                 <Typography
                   variant="body2"
-                  className="primary-blue"
                   sx={{
-                    "&:hover": {
-                      textDecoration: "underline",
-                    },
+                    fontWeight: 600,
+                    color: isDisabled ? "text.disabled" : "text.primary",
                   }}
                 >
-                  {params.value}
+                  {throwData.distance}
                 </Typography>
-              </Link>
-            </Box>
-          );
-        }
-        return (
-          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-            <Typography variant="body2">{params.value}</Typography>
-          </Box>
-        );
-      },
-    },
-    { field: "distanceDisplay", headerName: "Distance", flex: 1, minWidth: 120 },
-    {
-      field: "videoUrl",
-      headerName: "Video",
-      flex: 1,
-      minWidth: 100,
-      renderCell: (params: GridRenderCellParams) => {
-        if (params.value) {
-          return (
-            <IconButton component="a" href={params.value} target="_blank" rel="noopener noreferrer" aria-label="Watch video" size="small">
-              <Videocam className="primary-blue" />
-            </IconButton>
-          );
-        }
-        return (
-          <Typography variant="body2" color="text.secondary">
-            -
-          </Typography>
-        );
-      },
-    },
-    { field: "throwClass", headerName: "Class", flex: 1, minWidth: 150 },
-    { field: "throwType", headerName: "Throw Type", flex: 1, minWidth: 150 },
-  ];
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75rem",
+                    color: isDisabled ? "text.disabled" : "text.secondary",
+                  }}
+                >
+                  {throwData.points !== null ? `${throwData.points} pts` : "-"}
+                </Typography>
+              </Box>
+            );
+          },
+        })),
+        { field: "throwClass", headerName: "Class", flex: 1, minWidth: 150 },
+      ]
+    : [
+        { field: "rank", headerName: "Rank", type: "number", width: 80, align: "center", headerAlign: "center" },
+        {
+          field: "athleteName",
+          headerName: "Athlete Name",
+          flex: 1,
+          minWidth: 150,
+          renderCell: (params: GridRenderCellParams) => {
+            const userId = params.row.userId;
+            if (userId) {
+              return (
+                <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                  <Link
+                    to={`/athletes/${userId}`}
+                    style={{
+                      textDecoration: "none",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Typography
+                      variant="body2"
+                      className="primary-blue"
+                      sx={{
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      {params.value}
+                    </Typography>
+                  </Link>
+                </Box>
+              );
+            }
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                <Typography variant="body2">{params.value}</Typography>
+              </Box>
+            );
+          },
+        },
+        { field: "distanceDisplay", headerName: "Distance", flex: 1, minWidth: 120 },
+        {
+          field: "videoUrl",
+          headerName: "Video",
+          flex: 1,
+          minWidth: 100,
+          renderCell: (params: GridRenderCellParams) => {
+            if (params.value) {
+              return (
+                <IconButton component="a" href={params.value} target="_blank" rel="noopener noreferrer" aria-label="Watch video" size="small">
+                  <Videocam className="primary-blue" />
+                </IconButton>
+              );
+            }
+            return (
+              <Typography variant="body2" color="text.secondary">
+                -
+              </Typography>
+            );
+          },
+        },
+        { field: "throwClass", headerName: "Class", flex: 1, minWidth: 150 },
+        { field: "throwType", headerName: "Throw Type", flex: 1, minWidth: 150 },
+      ];
 
   return (
     <Box sx={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -265,10 +416,14 @@ function ThrowRankings() {
             <FormControl sx={{ width: { xs: "100%", sm: "auto" }, minWidth: { xs: "100%", sm: 200 } }}>
               <InputLabel>Throw Type</InputLabel>
               <Select
-                value={filters.throwTypeId || (throwTypes.length > 0 ? throwTypes[0].id : "")}
+                value={filters.throwTypeId ?? "overall"}
                 label="Throw Type"
-                onChange={(e) => dispatch(setThrowTypeFilter(e.target.value ? Number(e.target.value) : null))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  dispatch(setThrowTypeFilter(value === "overall" ? null : Number(value)));
+                }}
               >
+                <MenuItem value="overall">Overall</MenuItem>
                 {throwTypes.map((throwType) => {
                   const throwTypeId = throwType.id;
                   return (

@@ -3,24 +3,16 @@
  * ⚠️  Do not manually modify this file as it will be overwritten on the next generation.
  * ⚠️  To update this interface, modify the corresponding DTO in the backend.
  */
-export interface AthleteThrowRankingDto {
+export interface AthleteThrowOverallRankingDto {
   userId: number
   firstName: string | null
   lastName: string | null
   currentClassTypeId: number | null
-  throwType: {
-    id: number
-    name: string
-    maxDistance: number
-  }
   classType: {
     id: number
     name: string
   }
-  distance: number
-  isPr: boolean
-  videoUrl: string | null
-  weight: number | null
-  score: string | null
-  points: number | null
+  throws: AthleteThrowRankingDto[]
+  totalPoints: number
+  usedThrowTypeIds: number[] // IDs of throw types used in totalPoints calculation
 }
