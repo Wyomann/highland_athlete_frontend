@@ -162,12 +162,13 @@ function ThrowRankings() {
   const rows = isOverallSelected
     ? (displayRankings as AthleteThrowOverallRankingDto[]).map((ranking, index) => {
         // Create an object with throw data for each throwType
-        const throwData: { [throwTypeId: number]: { distance: string; points: number | null } } = {};
+        const throwData: { [throwTypeId: number]: { distance: string; points: number | null; weight: number | null } } = {};
         ranking.throws.forEach((throwItem) => {
           const { feet, inches } = convertFromDistance(throwItem.distance);
           throwData[throwItem.throwType.id] = {
             distance: `${feet}' ${inches}"`,
             points: throwItem.points,
+            weight: throwItem.weight,
           };
         });
 
@@ -191,6 +192,7 @@ function ThrowRankings() {
       })
     : (displayRankings as AthleteThrowRankingDto[]).map((ranking, index) => {
         const { feet, inches } = convertFromDistance(ranking.distance);
+        const isCaber = ranking.throwType.name.toLowerCase() === "caber";
         return {
           id: `${ranking.firstName}-${ranking.lastName}-${ranking.throwType.id}-${index}`,
           rank: index + 1,
@@ -200,6 +202,10 @@ function ThrowRankings() {
           throwType: ranking.throwType.name,
           distance: ranking.distance,
           distanceDisplay: `${feet}' ${inches}"`,
+          lengthDisplay: `${feet}' ${inches}"`, // For Caber
+          weight: ranking.weight ? Math.floor(ranking.weight) : null,
+          score: ranking.score,
+          points: ranking.points,
           videoUrl: ranking.videoUrl,
         };
       });
@@ -256,9 +262,10 @@ function ThrowRankings() {
           align: "center" as const,
           headerAlign: "center" as const,
           renderCell: (params: GridRenderCellParams) => {
-            const throwData = params.value as { distance: string; points: number | null } | null;
+            const throwData = params.value as { distance: string; points: number | null; weight: number | null } | null;
             const usedThrowTypeIds = (params.row.usedThrowTypeIds as number[]) || [];
             const isDisabled = !usedThrowTypeIds.includes(throwType.id);
+            const isCaber = throwType.name.toLowerCase() === "caber";
 
             if (!throwData) {
               return (
@@ -296,6 +303,14 @@ function ThrowRankings() {
                   }}
                 >
                   {throwData.distance}
+                  {isCaber && throwData.weight && (
+                    <>
+                      {" "}
+                      <Box component="span" sx={{ fontWeight: 600 }}>
+                        {Math.floor(throwData.weight)} lbs
+                      </Box>
+                    </>
+                  )}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -353,7 +368,75 @@ function ThrowRankings() {
             );
           },
         },
-        { field: "distanceDisplay", headerName: "Distance", flex: 1, minWidth: 120 },
+        {
+          field: "points",
+          headerName: "Points",
+          type: "number",
+          flex: 1,
+          minWidth: 100,
+          headerAlign: "left",
+          renderCell: (params: GridRenderCellParams) => {
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                {params.value !== null && params.value !== undefined ? (
+                  <Typography variant="body2">{params.value}</Typography>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    -
+                  </Typography>
+                )}
+              </Box>
+            );
+          },
+        },
+        // Check if current throw type is Caber
+        ...(filters.throwTypeId && throwTypes.find((tt) => tt.id === filters.throwTypeId)?.name.toLowerCase() === "caber"
+          ? [
+              { field: "lengthDisplay", headerName: "Length", flex: 1, minWidth: 120 },
+              {
+                field: "weight",
+                headerName: "Weight",
+                flex: 1,
+                minWidth: 100,
+                renderCell: (params: GridRenderCellParams) => {
+                  return (
+                    <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                      {params.value !== null && params.value !== undefined ? (
+                        <Typography variant="body2">
+                          {params.value} lbs
+                        </Typography>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          -
+                        </Typography>
+                      )}
+                    </Box>
+                  );
+                },
+              },
+              {
+                field: "score",
+                headerName: "Score",
+                flex: 1,
+                minWidth: 100,
+                renderCell: (params: GridRenderCellParams) => {
+                  return (
+                    <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                      {params.value ? (
+                        <Typography variant="body2">{params.value}</Typography>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          -
+                        </Typography>
+                      )}
+                    </Box>
+                  );
+                },
+              },
+            ]
+          : [
+              { field: "distanceDisplay", headerName: "Distance", flex: 1, minWidth: 120 },
+            ]),
         {
           field: "videoUrl",
           headerName: "Video",

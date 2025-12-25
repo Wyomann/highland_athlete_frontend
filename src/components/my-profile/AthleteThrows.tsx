@@ -219,14 +219,26 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
     const selectedClassTypeId = Number(formData.classTypeId);
     const selectedThrowType = throwTypes.find((type) => type.id === selectedThrowTypeId);
 
-    // Check for duplicate PRs with the same throw type and class type (skip if editing the same throw)
+    // Check for existing throw for this class type (only allow 1 throw type per class type)
     if (!editingThrow) {
-      const existingPR = athleteThrows.find(
-        (throwItem) => throwItem.throwTypeId === selectedThrowTypeId && throwItem.classTypeId === selectedClassTypeId && throwItem.isPr
+      const existingThrowForClass = athleteThrows.find(
+        (throwItem) => throwItem.classTypeId === selectedClassTypeId && throwItem.isPr
       );
-      if (existingPR) {
+      if (existingThrowForClass) {
         const classTypeName = getClassTypeName(selectedClassTypeId);
-        toast.error(`You already have a PR for ${selectedThrowType?.name || "this throw type"} in ${classTypeName}`);
+        const existingThrowTypeName = getThrowTypeName(existingThrowForClass.throwTypeId);
+        toast.error(`You already have a ${existingThrowTypeName} PR for ${classTypeName}. Only one throw type per class type is allowed.`);
+        return;
+      }
+    } else {
+      // When editing, check if there's another throw type for this class type (excluding the current throw being edited)
+      const existingThrowForClass = athleteThrows.find(
+        (throwItem) => throwItem.classTypeId === selectedClassTypeId && throwItem.throwTypeId !== selectedThrowTypeId && throwItem.isPr
+      );
+      if (existingThrowForClass) {
+        const classTypeName = getClassTypeName(selectedClassTypeId);
+        const existingThrowTypeName = getThrowTypeName(existingThrowForClass.throwTypeId);
+        toast.error(`You already have a ${existingThrowTypeName} PR for ${classTypeName}. Only one throw type per class type is allowed.`);
         return;
       }
     }
@@ -237,6 +249,18 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
       const maxInches = Math.round((selectedThrowType.maxDistance - maxFeet) * 12);
       toast.error(`Distance cannot exceed ${maxFeet}' ${maxInches}" for ${selectedThrowType.name}`);
       return;
+    }
+
+    // Validate score for Caber (clock-like time format)
+    const isCaber = selectedThrowType?.name.toLowerCase() === "caber";
+    if (isCaber && formData.score) {
+      // Pattern: number (1-2 digits) optionally followed by : and two digits
+      // Examples: 12, 11:45, 11:30, 10:45, 10, 10:00, 9:45
+      const scorePattern = /^(\d{1,2}(:\d{2})?)$/;
+      if (!scorePattern.test(formData.score.trim())) {
+        toast.error("Score must be in clock-like format (e.g., 12, 11:45, 10:00)");
+        return;
+      }
     }
 
     setLoading(true);
@@ -511,7 +535,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                   return (
                     <Box sx={{ display: "flex", gap: 2 }}>
                       <TextField
-                        label="Weight"
+                        label="Weight in lbs"
                         name="weight"
                         type="number"
                         value={formData.weight}
@@ -522,7 +546,18 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                         }}
                         sx={{ flex: 1 }}
                       />
-                      <TextField label="Score" name="score" type="text" value={formData.score} onChange={handleChange} sx={{ flex: 1 }} />
+                      <TextField
+                        label="Score"
+                        name="score"
+                        type="text"
+                        value={formData.score}
+                        onChange={handleChange}
+                        helperText="Clock-like format (e.g., 12, 11:45, 10:00)"
+                        inputProps={{
+                          pattern: "^\\d{1,2}(:\\d{2})?$",
+                        }}
+                        sx={{ flex: 1 }}
+                      />
                     </Box>
                   );
                 }
