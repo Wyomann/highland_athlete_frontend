@@ -14,6 +14,7 @@ function LiftRankings() {
   const classTypes = useSelector((state: RootState) => state.shared.classTypes);
   const liftTypes = useSelector((state: RootState) => state.shared.liftTypes);
   const { athleteLiftRankings, loading, filters } = useSelector((state: RootState) => state.liftRankings);
+  const loggedInUser = useSelector((state: RootState) => state.authentication.user);
   const initializedRef = useRef(false);
   const hasInitialFetchRef = useRef(false);
   const prevFiltersRef = useRef<{ classTypeId: number | null; liftTypeId: number | null; prType: "all" | "current" | "allTime" } | null>(null);
@@ -166,6 +167,7 @@ function LiftRankings() {
       minWidth: 150,
       renderCell: (params: GridRenderCellParams) => {
         const userId = params.row.userId;
+        const isLoggedInUser = loggedInUser && userId === loggedInUser.id;
         if (userId) {
           return (
             <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -180,6 +182,8 @@ function LiftRankings() {
                   variant="body2"
                   className="primary-blue"
                   sx={{
+                    fontWeight: isLoggedInUser ? "bold" : "normal",
+                    textShadow: isLoggedInUser ? "0 0 16px rgba(25, 118, 210, 0.6)" : "none",
                     "&:hover": {
                       textDecoration: "underline",
                     },

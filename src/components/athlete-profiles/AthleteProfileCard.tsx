@@ -62,7 +62,7 @@ function AthleteProfile({ user }: AthleteProfileProps) {
   // Format weight
   const formatWeight = (): string => {
     if (!user.weight) return "N/A";
-    return `${user.weight} lbs`;
+    return `${Math.floor(user.weight)} lbs`;
   };
 
   // Calculate age

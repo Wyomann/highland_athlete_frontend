@@ -221,9 +221,9 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
 
     // Check for existing throw for this class type (only allow 1 throw type per class type)
     if (!editingThrow) {
-      const existingThrowForClass = athleteThrows.find(
-        (throwItem) => throwItem.classTypeId === selectedClassTypeId && throwItem.isPr
-      );
+      const existingThrowForClass = athleteThrows.find((throwItem) => throwItem.classTypeId === selectedClassTypeId &&
+      throwItem.throwTypeId === selectedThrowTypeId &&  
+      throwItem.isPr);
       if (existingThrowForClass) {
         const classTypeName = getClassTypeName(selectedClassTypeId);
         const existingThrowTypeName = getThrowTypeName(existingThrowForClass.throwTypeId);
@@ -231,9 +231,12 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
         return;
       }
     } else {
-      // When editing, check if there's another throw type for this class type (excluding the current throw being edited)
+      // When editing, check if there's another throw for this class type (excluding the current throw being edited by ID)
       const existingThrowForClass = athleteThrows.find(
-        (throwItem) => throwItem.classTypeId === selectedClassTypeId && throwItem.throwTypeId !== selectedThrowTypeId && throwItem.isPr
+        (throwItem) =>
+          throwItem.id !== editingThrow.id && 
+        throwItem.throwTypeId === selectedThrowTypeId && 
+        throwItem.classTypeId === selectedClassTypeId && throwItem.isPr
       );
       if (existingThrowForClass) {
         const classTypeName = getClassTypeName(selectedClassTypeId);
@@ -267,8 +270,11 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
 
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
-      const response = await fetch(`${API_BASE_URL}/api/athlete-throws`, {
-        method: "POST",
+      const url = editingThrow ? `${API_BASE_URL}/api/athlete-throws/${editingThrow.id}` : `${API_BASE_URL}/api/athlete-throws`;
+      const method = editingThrow ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -287,7 +293,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to add throw");
+        toast.error(data.message || (editingThrow ? "Failed to update throw" : "Failed to add throw"));
         setLoading(false);
         return;
       }
@@ -299,7 +305,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
         onThrowAdded();
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to add throw");
+      toast.error(err instanceof Error ? err.message : editingThrow ? "Failed to update throw" : "Failed to add throw");
     } finally {
       setLoading(false);
     }
@@ -388,7 +394,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                               const throwTypeName = getThrowTypeName(athleteThrow.throwTypeId);
                               const isCaber = throwTypeName.toLowerCase() === "caber";
                               const { feet, inches } = convertFromDistance(athleteThrow.distance);
-                              
+
                               if (isCaber) {
                                 return (
                                   <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
@@ -422,7 +428,7 @@ function AthleteThrows({ athleteThrows, onThrowAdded, currentClassTypeId }: Athl
                                   </Box>
                                 );
                               }
-                              
+
                               return (
                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                   <Typography variant="body1">

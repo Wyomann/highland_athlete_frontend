@@ -15,6 +15,7 @@ function ThrowRankings() {
   const classTypes = useSelector((state: RootState) => state.shared.classTypes);
   const throwTypes = useSelector((state: RootState) => state.shared.throwTypes);
   const { athleteThrowRankings, athleteThrowOverallRankings, loading, filters } = useSelector((state: RootState) => state.throwRankings);
+  const loggedInUser = useSelector((state: RootState) => state.authentication.user);
   const isOverallSelected = filters.throwTypeId === null;
   const initializedRef = useRef(false);
   const hasInitialFetchRef = useRef(false);
@@ -104,11 +105,7 @@ function ThrowRankings() {
       };
 
       const prevFilters = prevFiltersRef.current;
-      if (
-        prevFilters &&
-        (prevFilters.classTypeId !== currentFilters.classTypeId ||
-          prevFilters.throwTypeId !== currentFilters.throwTypeId)
-      ) {
+      if (prevFilters && (prevFilters.classTypeId !== currentFilters.classTypeId || prevFilters.throwTypeId !== currentFilters.throwTypeId)) {
         prevFiltersRef.current = currentFilters;
         dispatch(fetchAthleteThrows(currentFilters));
       }
@@ -117,32 +114,26 @@ function ThrowRankings() {
 
   // Filter by throw's class (classType.id) if a class filter is selected
   const displayRankings = isOverallSelected
-    ? (Array.isArray(athleteThrowOverallRankings)
-        ? athleteThrowOverallRankings.filter((ranking) => {
-            // If no class filter is selected (null or 0), show all throws
-            if (!filters.classTypeId || filters.classTypeId === 0) {
-              return true;
-            }
-            // Filter by the throw's class (classType.id)
-            return ranking.classType?.id === filters.classTypeId;
-          })
-        : [])
-    : (Array.isArray(athleteThrowRankings)
-        ? athleteThrowRankings.filter((ranking) => {
-            // If no class filter is selected (null or 0), show all throws
-            if (!filters.classTypeId || filters.classTypeId === 0) {
-              return true;
-            }
-            // Filter by the throw's class (classType.id), not the athlete's current class
-            return ranking.classType?.id === filters.classTypeId;
-          })
-        : []);
-
-  const getClassTypeName = (classTypeId: number | null): string => {
-    if (!classTypeId) return "N/A";
-    const classType = classTypes.find((ct) => ct.id === classTypeId);
-    return classType?.name || `Class ${classTypeId}`;
-  };
+    ? Array.isArray(athleteThrowOverallRankings)
+      ? athleteThrowOverallRankings.filter((ranking) => {
+          // If no class filter is selected (null or 0), show all throws
+          if (!filters.classTypeId || filters.classTypeId === 0) {
+            return true;
+          }
+          // Filter by the throw's class (classType.id)
+          return ranking.classType?.id === filters.classTypeId;
+        })
+      : []
+    : Array.isArray(athleteThrowRankings)
+    ? athleteThrowRankings.filter((ranking) => {
+        // If no class filter is selected (null or 0), show all throws
+        if (!filters.classTypeId || filters.classTypeId === 0) {
+          return true;
+        }
+        // Filter by the throw's class (classType.id), not the athlete's current class
+        return ranking.classType?.id === filters.classTypeId;
+      })
+    : [];
 
   const getUserName = (firstName: string | null, lastName: string | null): string => {
     if (lastName && firstName) {
@@ -192,7 +183,6 @@ function ThrowRankings() {
       })
     : (displayRankings as AthleteThrowRankingDto[]).map((ranking, index) => {
         const { feet, inches } = convertFromDistance(ranking.distance);
-        const isCaber = ranking.throwType.name.toLowerCase() === "caber";
         return {
           id: `${ranking.firstName}-${ranking.lastName}-${ranking.throwType.id}-${index}`,
           rank: index + 1,
@@ -221,6 +211,7 @@ function ThrowRankings() {
           minWidth: 150,
           renderCell: (params: GridRenderCellParams) => {
             const userId = params.row.userId;
+            const isLoggedInUser = loggedInUser && userId === loggedInUser.id;
             if (userId) {
               return (
                 <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -235,6 +226,8 @@ function ThrowRankings() {
                       variant="body2"
                       className="primary-blue"
                       sx={{
+                        fontWeight: isLoggedInUser ? "bold" : "normal",
+                        textShadow: isLoggedInUser ? "0 0 16px rgba(25, 118, 210, 0.6)" : "none",
                         "&:hover": {
                           textDecoration: "underline",
                         },
@@ -336,6 +329,7 @@ function ThrowRankings() {
           minWidth: 150,
           renderCell: (params: GridRenderCellParams) => {
             const userId = params.row.userId;
+            const isLoggedInUser = loggedInUser && userId === loggedInUser.id;
             if (userId) {
               return (
                 <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -350,6 +344,8 @@ function ThrowRankings() {
                       variant="body2"
                       className="primary-blue"
                       sx={{
+                        fontWeight: isLoggedInUser ? "bold" : "normal",
+                        textShadow: isLoggedInUser ? "0 0 16px rgba(25, 118, 210, 0.6)" : "none",
                         "&:hover": {
                           textDecoration: "underline",
                         },
@@ -368,31 +364,48 @@ function ThrowRankings() {
             );
           },
         },
-        {
-          field: "points",
-          headerName: "Points",
-          type: "number",
-          flex: 1,
-          minWidth: 100,
-          headerAlign: "left",
-          renderCell: (params: GridRenderCellParams) => {
-            return (
-              <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-                {params.value !== null && params.value !== undefined ? (
-                  <Typography variant="body2">{params.value}</Typography>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    -
-                  </Typography>
-                )}
-              </Box>
-            );
-          },
-        },
         // Check if current throw type is Caber
         ...(filters.throwTypeId && throwTypes.find((tt) => tt.id === filters.throwTypeId)?.name.toLowerCase() === "caber"
           ? [
-              { field: "lengthDisplay", headerName: "Length", flex: 1, minWidth: 120 },
+              {
+                field: "lengthDisplay",
+                headerName: "Length",
+                flex: 1,
+                minWidth: 120,
+                align: "center" as const,
+                headerAlign: "center" as const,
+                renderCell: (params: GridRenderCellParams) => {
+                  const points = params.row.points;
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        py: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                        }}
+                      >
+                        {params.value}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: "0.75rem",
+                          color: "text.secondary",
+                        }}
+                      >
+                        {points !== null && points !== undefined ? `${points} pts` : "-"}
+                      </Typography>
+                    </Box>
+                  );
+                },
+              },
               {
                 field: "weight",
                 headerName: "Weight",
@@ -402,9 +415,7 @@ function ThrowRankings() {
                   return (
                     <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
                       {params.value !== null && params.value !== undefined ? (
-                        <Typography variant="body2">
-                          {params.value} lbs
-                        </Typography>
+                        <Typography variant="body2">{params.value} lbs</Typography>
                       ) : (
                         <Typography variant="body2" color="text.secondary">
                           -
@@ -435,7 +446,45 @@ function ThrowRankings() {
               },
             ]
           : [
-              { field: "distanceDisplay", headerName: "Distance", flex: 1, minWidth: 120 },
+              {
+                field: "distanceDisplay",
+                headerName: "Distance",
+                flex: 1,
+                minWidth: 120,
+                align: "center" as const,
+                headerAlign: "center" as const,
+                renderCell: (params: GridRenderCellParams) => {
+                  const points = params.row.points;
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        py: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                        }}
+                      >
+                        {params.value}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: "0.75rem",
+                          color: "text.secondary",
+                        }}
+                      >
+                        {points !== null && points !== undefined ? `${points} pts` : "-"}
+                      </Typography>
+                    </Box>
+                  );
+                },
+              },
             ]),
         {
           field: "videoUrl",
@@ -609,4 +658,3 @@ function ThrowRankings() {
 }
 
 export default ThrowRankings;
-

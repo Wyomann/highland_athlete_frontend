@@ -16,6 +16,7 @@ export interface AthleteThrow {
   videoUrl: string | null
   weight: number | null
   score: string | null
+  points: number | null
   createdAt: string
   updatedAt: string | null
 }

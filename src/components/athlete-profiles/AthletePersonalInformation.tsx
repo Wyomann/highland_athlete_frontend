@@ -145,7 +145,7 @@ function AthletePersonalInformation({ user }: AthletePersonalInformationProps) {
               disabled
               sx={{ flex: 1 }}
             />
-            <TextField label="Weight" value={user.weight ? `${user.weight} lbs` : ""} disabled sx={{ flex: 1 }} />
+            <TextField label="Weight" value={user.weight ? `${Math.floor(user.weight)} lbs` : ""} disabled sx={{ flex: 1 }} />
             <TextField
               label="Age"
               value={calculateAge(user.dateOfBirth) !== null ? `${calculateAge(user.dateOfBirth)} years old` : ""}

@@ -53,9 +53,25 @@ export const fetchAthleteThrows = createAsyncThunk(
 
         // Return object with type indicator and data
         const athleteThrowOverallRankings = data.athleteThrowOverallRankings || data.athleteThrows || data || [];
+        
+        // Group by userId and ensure throws match their userId
+        const groupedRankings = Array.isArray(athleteThrowOverallRankings) 
+          ? athleteThrowOverallRankings.map((ranking: AthleteThrowOverallRankingDto) => {
+              // Filter throws to only include those where throw.userId === ranking.userId
+              const filteredThrows = ranking.throws?.filter(
+                (throwItem) => throwItem.userId === ranking.userId
+              ) || [];
+              
+              return {
+                ...ranking,
+                throws: filteredThrows,
+              };
+            })
+          : [];
+        
         return {
           type: "overall" as const,
-          data: Array.isArray(athleteThrowOverallRankings) ? athleteThrowOverallRankings : [],
+          data: groupedRankings,
         };
       } else {
         // Use the regular rankings endpoint

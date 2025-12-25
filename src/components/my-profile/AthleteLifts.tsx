@@ -195,8 +195,13 @@ function AthleteLifts({ athleteLifts, onLiftAdded }: AthleteLiftsProps) {
 
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
-      const response = await fetch(`${API_BASE_URL}/api/athlete-lifts`, {
-        method: "POST",
+      const url = editingLift 
+        ? `${API_BASE_URL}/api/athlete-lifts/${editingLift.id}`
+        : `${API_BASE_URL}/api/athlete-lifts`;
+      const method = editingLift ? "PUT" : "POST";
+      
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -213,7 +218,7 @@ function AthleteLifts({ athleteLifts, onLiftAdded }: AthleteLiftsProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to add lift");
+        toast.error(data.message || (editingLift ? "Failed to update lift" : "Failed to add lift"));
         setLoading(false);
         return;
       }
@@ -227,7 +232,7 @@ function AthleteLifts({ athleteLifts, onLiftAdded }: AthleteLiftsProps) {
         onLiftAdded();
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to add lift");
+      toast.error(err instanceof Error ? err.message : (editingLift ? "Failed to update lift" : "Failed to add lift"));
     } finally {
       setLoading(false);
     }
