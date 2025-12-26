@@ -246,6 +246,7 @@ function ThrowRankings() {
             );
           },
         },
+        { field: "throwClass", headerName: "Class", flex: 1, minWidth: 150 },
         // Dynamic columns for each throwType
         ...throwTypes.map((throwType) => ({
           field: `throw_${throwType.id}`,
@@ -318,7 +319,6 @@ function ThrowRankings() {
             );
           },
         })),
-        { field: "throwClass", headerName: "Class", flex: 1, minWidth: 150 },
       ]
     : [
         { field: "rank", headerName: "Rank", type: "number", width: 80, align: "center", headerAlign: "center" },
