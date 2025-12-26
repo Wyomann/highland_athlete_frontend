@@ -5,6 +5,7 @@ import sharedReducer from "../slices/sharedSlice";
 import liftRankingsReducer from "../slices/liftRankingsSlice";
 import throwRankingsReducer from "../slices/throwRankingsSlice";
 import athletesReducer from "../slices/athletesSlice";
+import manageUsersReducer from "../slices/manageUsersSlice";
 
 // Create the listener middleware
 const listenerMiddleware = createListenerMiddleware();
@@ -119,6 +120,7 @@ export const store = configureStore({
     liftRankings: liftRankingsReducer,
     throwRankings: throwRankingsReducer,
     athletes: athletesReducer,
+    manageUsers: manageUsersReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware),
