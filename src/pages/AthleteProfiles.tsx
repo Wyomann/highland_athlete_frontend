@@ -12,20 +12,23 @@ function AthleteProfiles() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { athletes, pagination, loading } = useSelector((state: RootState) => state.athletes);
   const classTypes = useSelector((state: RootState) => state.shared.classTypes);
+  const states = useSelector((state: RootState) => state.shared.states);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClassTypeId, setSelectedClassTypeId] = useState<number | null>(null);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initializedRef = useRef(false);
   const hasInitialFetchRef = useRef(false);
-  const prevFiltersRef = useRef<{ search: string; classTypeId: number | null } | null>(null);
+  const prevFiltersRef = useRef<{ search: string; classTypeId: number | null; state: string | null } | null>(null);
 
   // Initialize filters from URL params if they exist
   useEffect(() => {
-    if (!initializedRef.current && classTypes.length > 0) {
+    if (!initializedRef.current && classTypes.length > 0 && states.length > 0) {
       // Read URL params
       const classTypeIdParam = searchParams.get("classTypeId");
       const searchParam = searchParams.get("search");
+      const stateParam = searchParams.get("state");
 
       // Set class type filter from URL param
       if (classTypeIdParam) {
@@ -39,6 +42,17 @@ function AthleteProfiles() {
         setSelectedClassTypeId(null);
       }
 
+      // Set state filter from URL param
+      if (stateParam) {
+        if (states.some((s) => s.abbreviation === stateParam)) {
+          setSelectedState(stateParam);
+        } else {
+          setSelectedState(null);
+        }
+      } else {
+        setSelectedState(null);
+      }
+
       // Set search term from URL param
       if (searchParam) {
         setSearchTerm(searchParam);
@@ -48,14 +62,15 @@ function AthleteProfiles() {
 
       initializedRef.current = true;
     }
-  }, [classTypes, searchParams]);
+  }, [classTypes, states, searchParams]);
 
   // Initial fetch on component mount (after initialization)
   useEffect(() => {
-    if (initializedRef.current && !hasInitialFetchRef.current && classTypes.length > 0) {
+    if (initializedRef.current && !hasInitialFetchRef.current && classTypes.length > 0 && states.length > 0) {
       // Read URL params directly to get the actual filter values
       const classTypeIdParam = searchParams.get("classTypeId");
       const searchParam = searchParams.get("search");
+      const stateParam = searchParams.get("state");
 
       const initialClassTypeId = classTypeIdParam
         ? (() => {
@@ -64,13 +79,14 @@ function AthleteProfiles() {
           })()
         : null;
 
+      const initialState = stateParam && states.some((s) => s.abbreviation === stateParam) ? stateParam : null;
       const initialSearch = searchParam || "";
 
       hasInitialFetchRef.current = true;
-      prevFiltersRef.current = { search: initialSearch, classTypeId: initialClassTypeId };
-      dispatch(getAllUsers({ page: 1, perPage: 50, search: initialSearch, classTypeId: initialClassTypeId }));
+      prevFiltersRef.current = { search: initialSearch, classTypeId: initialClassTypeId, state: initialState };
+      dispatch(getAllUsers({ page: 1, perPage: 50, search: initialSearch, classTypeId: initialClassTypeId, state: initialState }));
     }
-  }, [dispatch, classTypes.length, searchParams]);
+  }, [dispatch, classTypes.length, states.length, searchParams]);
 
   // Update URL params when filters change
   useEffect(() => {
@@ -81,13 +97,17 @@ function AthleteProfiles() {
         newParams.set("classTypeId", selectedClassTypeId.toString());
       }
 
+      if (selectedState !== null && selectedState !== "") {
+        newParams.set("state", selectedState);
+      }
+
       if (searchTerm && searchTerm.trim() !== "") {
         newParams.set("search", searchTerm.trim());
       }
 
       setSearchParams(newParams, { replace: true });
     }
-  }, [selectedClassTypeId, searchTerm, setSearchParams]);
+  }, [selectedClassTypeId, selectedState, searchTerm, setSearchParams]);
 
   // Handle filter changes with debouncing (only after initial fetch)
   useEffect(() => {
@@ -101,13 +121,14 @@ function AthleteProfiles() {
     if (
       prevFilters &&
       prevFilters.search === searchTerm &&
-      prevFilters.classTypeId === selectedClassTypeId
+      prevFilters.classTypeId === selectedClassTypeId &&
+      prevFilters.state === selectedState
     ) {
       return;
     }
 
     // Update previous filters
-    prevFiltersRef.current = { search: searchTerm, classTypeId: selectedClassTypeId };
+    prevFiltersRef.current = { search: searchTerm, classTypeId: selectedClassTypeId, state: selectedState };
 
     // Clear existing timeout
     if (searchTimeoutRef.current) {
@@ -116,7 +137,7 @@ function AthleteProfiles() {
 
     // Set new timeout for debounced search
     searchTimeoutRef.current = setTimeout(() => {
-      dispatch(getAllUsers({ page: 1, perPage: 50, search: searchTerm, classTypeId: selectedClassTypeId }));
+      dispatch(getAllUsers({ page: 1, perPage: 50, search: searchTerm, classTypeId: selectedClassTypeId, state: selectedState }));
     }, 500); // 500ms debounce
 
     // Cleanup timeout on unmount
@@ -125,7 +146,7 @@ function AthleteProfiles() {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [dispatch, searchTerm, selectedClassTypeId]);
+  }, [dispatch, searchTerm, selectedClassTypeId, selectedState]);
 
   return (
     <Box sx={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -183,8 +204,33 @@ function AthleteProfiles() {
                 ))}
               </Select>
             </FormControl>
+            <FormControl sx={{ width: { xs: "100%", sm: "auto" }, minWidth: { xs: "100%", sm: 200 } }}>
+              <InputLabel>State</InputLabel>
+              <Select
+                value={selectedState === null ? "all" : selectedState}
+                label="State"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedState(value === "all" ? null : value);
+                }}
+                renderValue={(value) => {
+                  if (value === "all" || value === "") {
+                    return "All States";
+                  }
+                  const state = states.find((s) => s.abbreviation === value);
+                  return state ? `${state.abbreviation} - ${state.name}` : "All States";
+                }}
+              >
+                <MenuItem value="all">All States</MenuItem>
+                {states.map((state) => (
+                  <MenuItem key={state.abbreviation} value={state.abbreviation}>
+                    {state.abbreviation} - {state.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Box>
-          {pagination && (searchTerm || selectedClassTypeId !== null) && (
+          {pagination && (searchTerm || selectedClassTypeId !== null || selectedState !== null) && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
               Showing {athletes.length} of {pagination.total} athletes
             </Typography>
@@ -201,7 +247,7 @@ function AthleteProfiles() {
         ) : athletes.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 8 }}>
             <Typography variant="body1" color="text.secondary">
-              No athletes found. {searchTerm || selectedClassTypeId !== null ? "Try adjusting your filters." : ""}
+              No athletes found. {searchTerm || selectedClassTypeId !== null || selectedState !== null ? "Try adjusting your filters." : ""}
             </Typography>
           </Box>
         ) : (

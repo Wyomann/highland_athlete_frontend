@@ -54,6 +54,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.authentication);
   const classTypes = useSelector((state: RootState) => state.shared.classTypes);
+  const states = useSelector((state: RootState) => state.shared.states);
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -70,6 +71,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
     weight: "",
     dateOfBirth: "",
     currentClassTypeId: "",
+    state: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<{
@@ -96,6 +98,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
       weight: user.weight ? user.weight.toString() : "",
       dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split("T")[0] : "",
       currentClassTypeId: user.currentClassTypeId ? user.currentClassTypeId.toString() : "",
+      state: user.state || "",
     });
   }, [user]);
 
@@ -114,6 +117,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
       weight: user.weight ? user.weight.toString() : "",
       dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split("T")[0] : "",
       currentClassTypeId: user.currentClassTypeId ? user.currentClassTypeId.toString() : "",
+      state: user.state || "",
     });
     setValidationErrors({});
     setIsEditing(false);
@@ -209,6 +213,7 @@ function PersonalInformation({ user }: PersonalInformationProps) {
       weight?: number | null;
       dateOfBirth?: string | null;
       currentClassTypeId?: number | null;
+      state?: string | null;
     } = {
       firstName: formData.firstName || null,
       lastName: formData.lastName || null,
@@ -249,6 +254,13 @@ function PersonalInformation({ user }: PersonalInformationProps) {
       updateData.currentClassTypeId = parseInt(formData.currentClassTypeId);
     } else {
       updateData.currentClassTypeId = null;
+    }
+
+    // State
+    if (formData.state) {
+      updateData.state = formData.state;
+    } else {
+      updateData.state = null;
     }
 
     const result = await dispatch(updateUser(updateData));
@@ -350,6 +362,31 @@ function PersonalInformation({ user }: PersonalInformationProps) {
                   </MenuItem>
                 );
               })}
+            </Select>
+          </FormControl>
+
+          {/* State */}
+          <FormControl fullWidth disabled={!isEditing}>
+            <InputLabel>State</InputLabel>
+            <Select
+              name="state"
+              value={isEditing ? formData.state : user.state || ""}
+              onChange={handleSelectChange}
+              label="State"
+              renderValue={(value) => {
+                if (!value || value === "") return "None";
+                const selectedState = states.find((s) => s.abbreviation === value);
+                return selectedState ? `${selectedState.abbreviation} - ${selectedState.name}` : value;
+              }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {states.map((state) => (
+                <MenuItem key={state.abbreviation} value={state.abbreviation}>
+                  {state.abbreviation} - {state.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 

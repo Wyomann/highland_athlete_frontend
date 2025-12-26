@@ -3,11 +3,13 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { ThrowType } from "../models/throw-type";
 import type { LiftType } from "../models/lift-type";
 import type { ClassType } from "../models/class-type";
+import type { State } from "../models/state";
 
 interface SharedState {
   throwTypes: ThrowType[];
   liftTypes: LiftType[];
   classTypes: ClassType[];
+  states: State[];
   loading: boolean;
   error: string | null;
 }
@@ -16,6 +18,7 @@ const initialState: SharedState = {
   throwTypes: [],
   liftTypes: [],
   classTypes: [],
+  states: [],
   loading: false,
   error: null,
 };
@@ -96,6 +99,30 @@ export const fetchClassTypes = createAsyncThunk(
   }
 );
 
+// Fetch states async thunk
+export const fetchStates = createAsyncThunk(
+  'shared/fetchStates',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/states`, {
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to fetch states');
+      }
+
+      return data.states || data;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to fetch states'
+      );
+    }
+  }
+);
+
 export const sharedSlice = createSlice({
   name: 'shared',
   initialState,
@@ -149,6 +176,22 @@ export const sharedSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchClassTypes.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Fetch states
+    builder
+      .addCase(fetchStates.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchStates.fulfilled, (state, action: PayloadAction<State[]>) => {
+        state.loading = false;
+        state.states = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchStates.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -21,6 +21,7 @@ export interface User {
   height: number | null
   weight: number | null
   dateOfBirth: string | null
+  state: string | null
   createdAt: string
   updatedAt: string | null
 }

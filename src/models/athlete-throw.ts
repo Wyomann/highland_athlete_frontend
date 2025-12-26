@@ -17,6 +17,7 @@ export interface AthleteThrow {
   weight: number | null
   score: string | null
   points: number | null
+  year: number | null
   createdAt: string
   updatedAt: string | null
 }

@@ -45,11 +45,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
 export const getAllUsers = createAsyncThunk(
   "athletes/getAllUsers",
   async (
-    params: { page?: number; perPage?: number; search?: string; classTypeId?: number | null } = {},
+    params: { page?: number; perPage?: number; search?: string; classTypeId?: number | null; state?: string | null } = {},
     { rejectWithValue }
   ) => {
     try {
-      const { page = 1, perPage = 50, search, classTypeId } = params;
+      const { page = 1, perPage = 50, search, classTypeId, state } = params;
       const url = new URL(`${API_BASE_URL}/api/users`);
       url.searchParams.set("page", page.toString());
       url.searchParams.set("perPage", perPage.toString());
@@ -60,6 +60,10 @@ export const getAllUsers = createAsyncThunk(
       
       if (classTypeId !== null && classTypeId !== undefined) {
         url.searchParams.set("classTypeId", classTypeId.toString());
+      }
+
+      if (state !== null && state !== undefined && state !== "") {
+        url.searchParams.set("state", state);
       }
 
       const response = await fetch(url.toString(), {

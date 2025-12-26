@@ -37,6 +37,7 @@ const calculateAge = (dateOfBirth: string | null): number | null => {
 function AthleteProfile({ user }: AthleteProfileProps) {
   const navigate = useNavigate();
   const classTypes = useSelector((state: RootState) => state.shared.classTypes);
+  const states = useSelector((state: RootState) => state.shared.states);
 
   const handleCardClick = () => {
     navigate(`/athletes/${user.id}`);
@@ -96,6 +97,12 @@ function AthleteProfile({ user }: AthleteProfileProps) {
           {user.currentClassTypeId && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {getClassTypeName(user.currentClassTypeId)}
+              {user.state && (
+                <>
+                  {" - "}
+                  {user.state}
+                </>
+              )}
             </Typography>
           )}
         </Box>
